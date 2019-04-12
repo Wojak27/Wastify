@@ -10,9 +10,9 @@
         class="searchField"
         placeholder="What are you looking for?"
       >
-      <a href>Heart</a>
-      <a href>Messages</a>
-      <a href>Profile</a>
+      <i class="fas fa-heart"></i>
+      <i class="fas fa-comment-dots"></i>
+      <i class="fas fa-ellipsis-h"></i>
     </nav>
   </div>
 </template>
@@ -51,7 +51,7 @@ export default {
 }
 
 input.searchField {
-  width: 200px;
+  width: 500px;
   border-radius: 8px;
   height: 25px;
   align-content: center;
