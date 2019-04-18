@@ -44,6 +44,14 @@ export default {
     };
   },
   methods: {
+    logout() {
+      firebase
+        .auth()
+        .signOut()
+        .then(() => {
+          this.$router.push({ name: "Login" });
+        });
+    },
     signup() {
       if (this.alias && this.email && this.password && this.repeatedPassword) {
         this.slug = slugify(this.alias, {
@@ -92,6 +100,9 @@ export default {
       } else {
         this.feedback = "You must enter a all fields";
       }
+    },
+    created() {
+      this.logout();
     }
   }
 };

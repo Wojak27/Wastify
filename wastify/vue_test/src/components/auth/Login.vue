@@ -47,7 +47,13 @@ export default {
       } else {
         this.feedback = "Please fill in both fields";
       }
+    },
+    logout() {
+      firebase.auth().signOut();
     }
+  },
+  created() {
+    this.logout();
   }
 };
 </script>

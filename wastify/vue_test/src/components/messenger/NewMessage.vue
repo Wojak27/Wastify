@@ -22,6 +22,7 @@ export default {
   methods: {
     addMessage() {
       if (this.newMessage) {
+        console.log("Adding new message");
         db.collection("messages")
           .add({
             content: this.newMessage,
@@ -30,6 +31,7 @@ export default {
           })
           .catch(err => {
             console.log(err);
+            this.feedback = err.message;
           });
         this.newMessage = null;
         this.feedback = null;
