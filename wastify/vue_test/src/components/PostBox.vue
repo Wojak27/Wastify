@@ -38,3 +38,18 @@
     </article>
   </div>
 </template>
+
+<script>
+export default {
+  name: "PostBox",
+  data(){
+    return{
+
+    }
+  }
+}
+</script>
+
+<style>
+
+</style>

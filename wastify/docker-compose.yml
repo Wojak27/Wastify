@@ -1,0 +1,30 @@
+version: '3'
+
+services:
+  product-service:
+    build: ./product
+    volumes:
+      - ./product:/usr/src/app
+    ports:
+      - 5001:80
+  website:
+    image: php:apache
+    volumes:
+      - ./website:/var/www/html
+    ports:
+      - 5000:80
+    depends_on:
+      - product-service
+  web:
+    image: ebiven/vue-cli
+    build: ./vue_test
+    ports:
+      - 8080:8080
+    command: sh -c "npm install && npm run dev"
+    volumes:
+      - "./vue_test:/app"
+    environment:
+      HOST: 0.0.0.0
+    depends_on:
+      - product-service
+  
