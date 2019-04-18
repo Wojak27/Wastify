@@ -1,7 +1,6 @@
 <template>
   <div class="hello">
     <Tiles/>
-    <PostBox/>
     <Footer/>
   </div>
 </template>
@@ -11,14 +10,12 @@ import "bulma/css/bulma.css";
 import ProfileBar from "@/components/ProfileBar";
 import Footer from "@/components/Footer";
 import Tiles from "@/components/Tiles";
-import PostBox from "@/components/PostBox";
 export default {
   name: "Index",
   components: {
     ProfileBar,
     Footer,
-    Tiles,
-    PostBox
+    Tiles
   },
   data() {
     return {

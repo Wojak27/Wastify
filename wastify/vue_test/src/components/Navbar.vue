@@ -1,27 +1,66 @@
 <template>
   <div class="navbar">
     <nav>
-      <img src="../assets/logo.png" alt="Wastify" class="logo">
-      <span>Wastify</span>
-      <input
-        type="text"
-        name="search"
-        id
-        class="searchField"
-        placeholder="What are you looking for?"
-      >
-      <i class="fas fa-heart"></i>
-      <i class="fas fa-comment-dots"></i>
-      <i class="fas fa-ellipsis-h"></i>
+      <div class="container">
+        <ul class="left">
+          <router-link :to="{name: 'Index'}" class="brand-logo left">
+            <img src="../assets/logo.png" alt="Wastify" class="logo">
+            <span>Wastify</span>
+          </router-link>
+        </ul>
+
+        <ul class="right">
+          <li>
+            <router-link :to="{name: 'Signup'}" v-if="!user">Signup</router-link>
+          </li>
+          <li>
+            <router-link :to="{name: 'Login'}" v-if="!user">Login</router-link>
+          </li>
+          <li v-if="user">
+            <router-link :to="{name: 'Messenger'}" v-if="user">Messeges</router-link>
+          </li>
+          <li v-if="user">
+            <a>{{user.email}}</a>
+          </li>
+          <li v-if="user">
+            <a @click="logout">Logout</a>
+          </li>
+        </ul>
+      </div>
     </nav>
   </div>
 </template>
 
 <script>
+import firebase from "firebase";
 export default {
   name: "Navbar",
   data() {
-    return {};
+    return {
+      user: null
+    };
+  },
+  methods: {
+    logout() {
+      firebase
+        .auth()
+        .signOut()
+        .then(() => {
+          this.$router.push({ name: "Login" });
+        });
+    }
+  },
+  created() {
+    let user = firebase.auth().currentUser;
+    firebase.auth().onAuthStateChanged(user => {
+      if (user) {
+        //user is logged in
+        this.user = user;
+      } else {
+        //user is not logged in
+        this.user = null;
+      }
+    });
   }
 };
 </script>
