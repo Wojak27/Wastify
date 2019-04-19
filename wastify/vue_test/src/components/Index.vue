@@ -1,7 +1,6 @@
 <template>
   <div class="hello">
     <Tiles/>
-    <Footer/>
   </div>
 </template>
 
@@ -31,5 +30,11 @@ export default {
   justify-content: center;
   display: inline-block;
   text-align: center;
+}
+
+.myfooter {
+  bottom: 0;
+  width: 100%;
+  height: 2.5rem;
 }
 </style>

@@ -8,8 +8,16 @@
       </div>
 
       <div class="field">
-        <label for="password">Password:</label>
-        <input type="password" name="password" v-model="password">
+        <label for="password" class="label">Password:</label>
+        <div class="control">
+          <input
+            type="password"
+            name="password"
+            v-model="password"
+            class="input"
+            placeholder="e.g Alex Smith"
+          >
+        </div>
       </div>
       <p class="red-text center" v-if="feedback">{{feedback}}</p>
       <div class="field">
@@ -21,6 +29,8 @@
 
 <script>
 import firebase from "firebase";
+import "bulma/css/bulma.css";
+
 export default {
   name: "Login",
   data() {

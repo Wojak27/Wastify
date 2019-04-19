@@ -17,6 +17,9 @@
             <router-link :to="{name: 'Login'}" v-if="!user">Login</router-link>
           </li>
           <li v-if="user">
+            <router-link :to="{name: 'Map'}" v-if="user">Map</router-link>
+          </li>
+          <li v-if="user">
             <router-link :to="{name: 'Messenger'}" v-if="user">Messeges</router-link>
           </li>
           <li v-if="user">

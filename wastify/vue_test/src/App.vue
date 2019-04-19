@@ -1,17 +1,20 @@
 <template>
   <div id="app">
-    <router-view/>
     <Navbar/>
+    <router-view/>
+    <Footer class="myfooter"/>
   </div>
 </template>
 
 <script>
 import Navbar from "@/components/Navbar";
+import Footer from "@/components/Footer";
 
 export default {
   name: "App",
   components: {
-    Navbar
+    Navbar,
+    Footer
   }
 };
 </script>
@@ -23,6 +26,11 @@ export default {
   -moz-osx-font-smoothing: grayscale;
   text-align: center;
   color: #2c3e50;
-  margin-top: 60px;
+  margin-top: 0px;
+  bottom: 0px;
+}
+.myfooter {
+  top: auto;
+  bottom: 0px;
 }
 </style>

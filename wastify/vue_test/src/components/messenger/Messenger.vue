@@ -21,11 +21,13 @@
 <script>
 import NewMessage from "@/components/messenger/NewMessage";
 import db from "@/firebase/init";
+import firebase from "firebase";
 export default {
   name: "Messenger",
   data() {
     return {
-      messages: []
+      messages: [],
+      name: "Karol"
     };
   },
   props: ["name"],

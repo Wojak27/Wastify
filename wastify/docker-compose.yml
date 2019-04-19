@@ -1,4 +1,4 @@
-version: '3'
+version: "3"
 
 services:
   product-service:
@@ -27,4 +27,15 @@ services:
       HOST: 0.0.0.0
     depends_on:
       - product-service
-  
+
+  db:
+    image: postgres
+  django:
+    build: ./django
+    command: python manage.py runserver 0.0.0.0:4000
+    volumes:
+      - ./django:/code
+    ports:
+      - "4000:4000"
+    depends_on:
+      - db

@@ -4,6 +4,7 @@ import Index from "@/components/Index";
 import Signup from "@/components/auth/Signup";
 import Login from "@/components/auth/Login";
 import Messenger from "@/components/messenger/Messenger";
+import GMap from "@/components/map/GMap";
 import firebase from "firebase";
 
 Vue.use(Router);
@@ -14,6 +15,14 @@ const router = new Router({
       path: "/",
       name: "Index",
       component: Index,
+      meta: {
+        requiresAuth: true
+      }
+    },
+    {
+      path: "/map",
+      name: "Map",
+      component: GMap,
       meta: {
         requiresAuth: true
       }
