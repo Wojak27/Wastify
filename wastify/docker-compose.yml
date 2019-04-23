@@ -1,12 +1,18 @@
 version: "3"
 
 services:
-  product-service:
+
+  # This was just for testing docker, left it for reference
+
+  flask:
+    restart: always
     build: ./product
     volumes:
       - ./product:/usr/src/app
     ports:
       - 5001:80
+    depends_on:
+      - db
   website:
     image: php:apache
     volumes:
@@ -14,7 +20,11 @@ services:
     ports:
       - 5000:80
     depends_on:
-      - product-service
+      - flask
+
+
+# This is my actual stuff i use to run the website:
+
   web:
     image: ebiven/vue-cli
     build: ./vue_test
@@ -26,16 +36,27 @@ services:
     environment:
       HOST: 0.0.0.0
     depends_on:
-      - product-service
+      - django
 
   db:
-    image: postgres
+    build: ./db
+    environment:
+      - POSTGRES_USER=postgres
+      - POSTGRES_PASSWORD=postgres
+    ports:
+      - 5002:80
   django:
+    # Restart always is needed for the hotreload, otherwise 
+    # you need to restart docker everytime to see changes
+    restart: always
     build: ./django
     command: python manage.py runserver 0.0.0.0:4000
     volumes:
       - ./django:/code
     ports:
+      # localhost:4000 is mapped to port 4000 in docker
       - "4000:4000"
+      # django can't run without the database db, 
+      # this is why you need to start the db container first
     depends_on:
       - db
