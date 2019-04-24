@@ -1,10 +1,11 @@
 import Vue from "vue";
 import Router from "vue-router";
-import Index from "@/components/Index";
+import Feed from "@/components/feed/Feed";
 import Signup from "@/components/auth/Signup";
 import Login from "@/components/auth/Login";
 import Messenger from "@/components/messenger/Messenger";
 import GMap from "@/components/map/GMap";
+import NewPost from "@/components/feed/NewPost";
 import firebase from "firebase";
 
 Vue.use(Router);
@@ -13,8 +14,8 @@ const router = new Router({
   routes: [
     {
       path: "/",
-      name: "Index",
-      component: Index,
+      name: "Feed",
+      component: Feed,
       meta: {
         requiresAuth: true
       }
@@ -44,6 +45,11 @@ const router = new Router({
       path: "/login",
       name: "Login",
       component: Login
+    },
+    {
+      path: "/new_post",
+      name: "NewPost",
+      component: NewPost
     }
   ]
 });

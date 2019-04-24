@@ -1,34 +1,53 @@
 <template>
-  <div class="navbar">
-    <nav>
-      <div class="container">
-        <ul class="left">
-          <router-link :to="{name: 'Index'}" class="brand-logo left">
+  <div class="navbar is-fixed-top" role="navigation">
+    <nav aria-label="dropdown navigation">
+      <div class="navbar-menu nav-container">
+        <ul class="navbar-start logo left">
+          <router-link :to="{name: 'Index'}">
             <img src="../assets/logo.png" alt="Wastify" class="logo">
             <span>Wastify</span>
           </router-link>
         </ul>
 
-        <ul class="right">
-          <li>
+        <ul class="navbar-end field right">
+          <li class="navbar-item">
             <router-link :to="{name: 'Signup'}" v-if="!user">Signup</router-link>
           </li>
-          <li>
+          <li class="navbar-item">
             <router-link :to="{name: 'Login'}" v-if="!user">Login</router-link>
           </li>
-          <li v-if="user">
+          <li v-if="user" class="navbar-item">
             <router-link :to="{name: 'Map'}" v-if="user">Map</router-link>
           </li>
-          <li v-if="user">
-            <router-link :to="{name: 'Messenger'}" v-if="user">Messeges</router-link>
+
+          <li v-if="user" class="navbar-item">
+            
           </li>
-          <li v-if="user">
-            <a>{{user.email}}</a>
-          </li>
-          <li v-if="user">
-            <a @click="logout">Logout</a>
+          <li v-if="user" class="navbar-item">
+            <div class="navbar-item has-dropdown is-hoverable">
+    <a class="navbar-link">
+      {{user.email}}
+    </a>
+
+    <div class="navbar-dropdown">
+      <a class="navbar-item">
+        Overview
+      </a>
+      <a class="navbar-item">
+        <router-link :to="{name: 'Messenger'}" v-if="user">Messeges</router-link>
+      </a>
+      <a class="navbar-item" v-if="user">
+        Profile
+      </a>
+      <hr class="navbar-divider">
+      <div class="navbar-item" v-if="user">
+        <a @click="logout">Logout</a>
+      </div>
+    </div>
+  </div>
           </li>
         </ul>
+        
       </div>
     </nav>
   </div>
@@ -36,6 +55,7 @@
 
 <script>
 import firebase from "firebase";
+import "bulma/css/bulma.css";
 export default {
   name: "Navbar",
   data() {
@@ -103,7 +123,20 @@ input.searchField {
 
 .logo {
   height: 40px;
-  left: 0px;
+  padding-left: 1rem;
   align-self: baseline;
 }
+
+ul.right {
+  padding-right: 5rem;
+}
+
+ul.left {
+  padding-left: 5rem;
+}
+.nav-container{
+  margin: auto;
+  max-width: 60rem;
+}
+
 </style>

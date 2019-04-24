@@ -9,6 +9,7 @@
 </template>
 
 <script>
+import 'bulma/css/bulma.css'
 import db from "@/firebase/init";
 export default {
   name: "NewMessage",

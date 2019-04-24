@@ -1,29 +1,38 @@
 <template>
-  <div class="signup container">
+  <div class="signup container box">
     <form @submit.prevent="signup" class="card-panel">
       <h2 class="center deep-purple-text">Signup</h2>
       <div class="field">
         <label for="alias">Username:</label>
-        <input type="text" name="alias" v-model="alias">
+        <input type="text" name="alias" v-model="alias"
+        class="input is-rounded">
       </div>
       <div class="field">
         <label for="email">Email:</label>
-        <input type="email" name="email" v-model="email">
+        <input type="email" name="email" v-model="email"
+        class="input is-rounded">
       </div>
 
       <div class="field">
         <label for="password">Password:</label>
-        <input type="password" name="password" v-model="password">
+        <input type="password" name="password" v-model="password"
+        class="input is-rounded">
       </div>
       <div class="field">
         <label for="password">Repeat password:</label>
-        <input type="password" name="repeated_password" v-model="repeatedPassword">
+        <input type="password" 
+        class="input is-rounded"
+        name="repeated_password" v-model="repeatedPassword">
       </div>
       <p class="red-text center" v-if="feedback">{{feedback}}</p>
       <div class="field center">
-        <button class="btn deep-purple">Signup</button>
+        <button class="button is-rounded">Signup</button><br>
+        or...
       </div>
-    </form>
+      <div class="field center">
+        <button class="button is-rounded" @click="loginWithGoogle"><img src="https://developers.google.com/identity/images/g-logo.png" class="googleImage"> Sign up with Google</button>
+      </div>
+      </form>
   </div>
 </template>
 <script>
@@ -80,7 +89,7 @@ export default {
                       user_id: cred.user.uid
                     })
                     .then(() => {
-                      this.$router.push({ name: "Index" });
+                      this.$router.push({ name: "Feed" });
                     });
                   this.feedback = null;
                   this.alias = null;
@@ -118,5 +127,8 @@ export default {
 }
 .signup .field {
   margin-bottom: 16px;
+}
+.googleImage{
+  height: 20px;
 }
 </style>
