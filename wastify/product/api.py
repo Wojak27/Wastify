@@ -28,86 +28,78 @@ db = SQLAlchemy(app)
 # init ma
 ma = Marshmallow(app)
 
-# Product Class/Model
-class Product(db.Model):
+# post Class/Model
+class Post(db.Model):
     id = db.Column(db.Integer, primary_key=True)
-    name = db.Column(db.String(100), unique=True)
+    #name = db.Column(db.String(100), unique=True)
+    authorEmail = db.Column(db.String(200))
     description = db.Column(db.String(200))
-    price = db.Column(db.Float)
-    qty = db.Column(db.Integer)
+    # add date, time, location, imgSrc and name 
 
-    def __init__(self, name, description, price, qty):
-        self.name = name
+    def __init__(self,description, authorEmail):
         self.description = description
-        self.price = price
-        self.qty = qty
+        self.authorEmail = authorEmail
 
-# Product Schema
-class ProductSchema(ma.Schema):
+# post Schema
+class PostSchema(ma.Schema):
      class Meta:
-         fields = ('id', 'name', 'description', 'price', 'qty')
+         fields = ('id', 'description', 'authorEmail')
 
-# Create a Product
-@app.route('/product', methods=['POST'])
-def add_product():
-    name = request.json['name']
+# Create a post
+@app.route('/post', methods=['POST'])
+def add_post():
     description = request.json['description']
-    price = request.json['price']
-    qty = request.json['qty']
+    authorEmail = request.json['authorEmail']
 
-    new_product = Product(name, description, price, qty)
+    new_post = Post(description, authorEmail)
 
-    db.session.add(new_product)
+    db.session.add(new_post)
     db.session.commit()
 
-    return product_schema.jsonify(new_product)
+    return post_schema.jsonify(new_post)
 
-# Get all products
-@app.route('/product', methods=['GET'])
-def get_products():
-    all_products = Product.query.all()
-    result = products_schema.dump(all_products)
+# Get all posts
+@app.route('/post', methods=['GET'])
+def get_posts():
+    all_posts = Post.query.all()
+    result = posts_schema.dump(all_posts)
     return jsonify(result.data)
 
-#Get one product
-@app.route('/product/<id>', methods=['GET'])
-def get_product(id):
-    product = Product.query.get(id)
-    return product_schema.jsonify(product)
+#Get one post
+@app.route('/post/<id>', methods=['GET'])
+def get_post(id):
+    post = Post.query.get(id)
+    return post_schema.jsonify(post)
 
-# Update a Product
-@app.route('/product/<id>', methods=['PUT'])
-def update_product(id):
-    product = Product.query.get(id)
+# Update a post
+@app.route('/post/<id>', methods=['PUT'])
+def update_post(id):
+    post = Post.query.get(id)
 
-    name = request.json['name']
     description = request.json['description']
-    price = request.json['price']
-    qty = request.json['qty']
+    authorEmail = request.json['authorEmail']
 
-    product.name = name
-    product.description = description
-    product.price = price
-    product.qty = qty
+    post.description = description
+    post.authorEmail = authorEmail
 
     db.session.commit()
 
-    return product_schema.jsonify(product)
+    return post_schema.jsonify(post)
 
-# Delete product
-@app.route('/product/<id>', methods=['DELETE'])
-def delete_product(id):
-    product = Product.query.get(id)
-    db.session.delete(product)
+# Delete post
+@app.route('/post/<id>', methods=['DELETE'])
+def delete_post(id):
+    post = Post.query.get(id)
+    db.session.delete(post)
 
     db.session.commit()
 
-    return product_schema.jsonify(product)
+    return post_schema.jsonify(post)
 
 
 # Init schema
-product_schema = ProductSchema(strict=True)
-products_schema = ProductSchema(many=True, strict=True)
+post_schema = PostSchema(strict=True)
+posts_schema = PostSchema(many=True, strict=True)
 
 #I just want to be able to manipulate the parameters
 @app.route('/login', methods=['GET', 'POST'])

@@ -2,7 +2,7 @@
   <div class="hello">
     <NewPost/>
     <div v-for="post in posts" :key="post.id">
-      <PostBox :text="post.description"/>
+      <PostBox :text="post.description" :authorEmail="post.authorEmail"/>
     </div>
     
   </div>
@@ -34,14 +34,15 @@ export default {
   created() {
     console.log("Hello")
 
-    axios.get('http://localhost:5001/product')
+    axios.get('http://localhost:5001/post')
     .then(response => {
       console.log(response.data)
       console.log(response.data[0])
       response.data.forEach(element => {
         this.posts.push({
           id: element.id,
-          description: element.description
+          description: element.description,
+          authorEmail: element.authorEmail
         })
         console.log(element)
       });

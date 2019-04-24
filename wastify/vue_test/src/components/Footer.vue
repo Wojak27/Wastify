@@ -21,6 +21,8 @@ export default {
 .footer {
   position: relative;
   margin-top: 5rem;
+  background-color: green;
+  color:white;
   bottom: 0;
   width: 100%;
 }
