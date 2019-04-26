@@ -9,7 +9,7 @@
     <div class="media-content">
       <div class="content">
         <p>
-          <strong>{{authorEmail}}</strong> <small>@johnsmith</small> <small>31m</small>
+          <strong>{{authorEmail}}</strong> <small>@johnsmith</small> <small>{{timestamp}}</small>
           <br>
           {{text}}
         </p>
@@ -37,7 +37,7 @@
 import "bulma/css/bulma.css";
 export default {
   name: "PostBox",
-  props: ['text', 'authorEmail'],
+  props: ['text', 'authorEmail', 'timestamp'],
   data(){
     return{
 

@@ -3,7 +3,7 @@
     <nav aria-label="dropdown navigation">
       <div class="navbar-menu nav-container">
         <ul class="navbar-start logo left">
-          <router-link :to="{name: 'Index'}">
+          <router-link :to="{name: 'Feed'}">
             <img src="../assets/logo.png" alt="Wastify" class="logo">
             <span>Wastify</span>
           </router-link>
@@ -24,26 +24,23 @@
             
           </li>
           <li v-if="user" class="navbar-item">
-            <div class="navbar-item has-dropdown is-hoverable">
-    <a class="navbar-link">
-      {{user.email}}
-    </a>
 
-    <div class="navbar-dropdown">
-      <a class="navbar-item">
-        Overview
-      </a>
-      <a class="navbar-item">
-        <router-link :to="{name: 'Messenger'}" v-if="user">Messeges</router-link>
-      </a>
-      <a class="navbar-item" v-if="user">
-        Profile
-      </a>
-      <hr class="navbar-divider">
-      <div class="navbar-item" v-if="user">
-        <a @click="logout">Logout</a>
-      </div>
-    </div>
+
+    <div class="navbar-item has-dropdown is-hoverable">
+        <a class="navbar-link" href="https://bulma.io/documentation/overview/start/">
+          
+        </a>
+        <div class="navbar-dropdown is-boxed">
+          <router-link class="navbar-item" :to="{name: 'Map'}" v-if="user">Map</router-link>
+          <router-link class="navbar-item" :to="{name: 'Feed'}" v-if="user">Feed</router-link>
+          <router-link class="navbar-item" :to="{name: 'Messenger'}" v-if="user">Messenger</router-link>
+          <router-link class="navbar-item" :to="{name: 'ProfilePage'}" v-if="user">Profile</router-link>
+          
+          <hr class="navbar-divider">
+          <a class="navbar-item" href="" @click="logout">
+            Logout
+          </a>
+        </div>
   </div>
           </li>
         </ul>

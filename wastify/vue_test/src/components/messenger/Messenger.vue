@@ -1,17 +1,27 @@
 <template>
-  <div class="chat container">
-    <h2 class="center teal-text">Messages</h2>
+  <div class="chat">
     <div class="card">
-      <div class="card-content">
-        <ul class="messages">
-          <li v-for="message in messages" :key="message.id">
+      <div class="messages" v-chat-scroll>
+        <div v-for="message in messages" :key="message.id" class="message-body">
+          <div class="name">
             <span class="teal-text">{{ message.name}}</span>
-            <span class="grey-text text-darken-3">{{message.content}}</span>
-            <span class="grey-text time">{{message.timestamp}}</span>
-          </li>
-        </ul>
+          </div>
+          <div class="time-message">
+            <div class="my-message">
+              <p class="is-size-5">
+                {{message.content}}
+              </p>
+        </div>
+          <div class="time">
+            <p class="is-size-7"> 
+              {{message.timestamp}}
+            </p>
+            
+        </div>
+          </div>
+          </div>
       </div>
-      <div class="card-action">
+      <div class="new-message">
         <NewMessage :name="name"/>
       </div>
     </div>
@@ -22,6 +32,7 @@
 import NewMessage from "@/components/messenger/NewMessage";
 import db from "@/firebase/init";
 import firebase from "firebase";
+import moment from "moment"
 export default {
   name: "Messenger",
   data() {
@@ -45,7 +56,7 @@ export default {
             id: doc.id,
             name: doc.data().name,
             content: doc.data().content,
-            timestamp: doc.data().timestamp
+            timestamp: moment(doc.data().timestamp).format('MMMM Do YYYY, h:mm:ss a')
           });
         }
       });
@@ -64,7 +75,91 @@ export default {
   font-size: 1.4em;
 }
 .chat .time {
-  display: block;
   font-size: 1.2em;
+}
+.chat{
+  margin-top:4rem;
+  display: flex;
+  flex-direction: column;
+  justify-content: bottom;
+  align-items: bottom;
+  height:auto;
+}
+.new-message{
+  width: 45rem;
+}
+
+@media screen and (max-width: 600px) {
+  .new-message{
+  width: 100%;
+  }
+}
+
+.messages{
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  height: 40rem;
+  overflow: auto;
+}
+
+
+.messages::-webkit-scrollbar-track{
+  background: #ddd;
+}
+.messages::-webkit-scrollbar-thumb{
+  background: #aaa;
+}
+.messages::-webkit-scrollbar{
+  width: 3px;
+}
+
+.card{
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+}
+
+.message-body{
+  display: flex;
+  width: 45rem;
+  justify-content: space-between;
+  border-top: #000;
+}
+
+@media screen and (max-width: 600px) {
+  .message-body{
+  display: flex;
+  width: 100%;
+  border-top: #000;
+}
+}
+
+.my-message{
+  flex: 2;
+  display: flex;
+  justify-content: flex-end;
+  align-items: flex-end;
+  padding: 10px;
+}
+.time{
+  display: flex;
+  padding: 0.1rem;
+  flex: 1;
+  justify-content: flex-end;
+  align-items: flex-end;
+}
+.name{
+  display: flex;
+  align-self: flex-start;
+  flex: 1;
+}
+
+.time-message{
+  flex:5;
+  display: flex;
+  flex-direction: column;
 }
 </style>

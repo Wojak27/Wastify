@@ -28,14 +28,12 @@ export default {
 
 <style scoped>
 .profileDiv {
-  position: fixed;
-  top: 60px;
-  width: 750px;
+  top: 2 rem;
 }
 .boxProfile {
-  width: 300px;
+  width: 13rem;
   height: 600px;
-  margin: 0px 0px 0px 550px;
+  margin: 0px 0px 0px 600px;
   background-color: rgb(219, 255, 236);
   border-radius: 20px;
   border-style: solid;

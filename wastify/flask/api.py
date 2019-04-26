@@ -34,24 +34,36 @@ class Post(db.Model):
     #name = db.Column(db.String(100), unique=True)
     authorEmail = db.Column(db.String(200))
     description = db.Column(db.String(200))
+
+    #Location of the post/poster, every post has purpouse...
+    lat = db.Column(db.Integer)
+    lng = db.Column(db.Integer)
+    timestamp = db.Column(db.Integer)
+
     # add date, time, location, imgSrc and name 
 
-    def __init__(self,description, authorEmail):
+    def __init__(self,description, authorEmail, lat, lng, timestamp):
         self.description = description
         self.authorEmail = authorEmail
+        self.lat = lat
+        self.lng = lng
+        self.timestamp = timestamp
 
 # post Schema
 class PostSchema(ma.Schema):
      class Meta:
-         fields = ('id', 'description', 'authorEmail')
+         fields = ('id', 'description', 'authorEmail', 'lat', 'lng', 'timestamp')
 
 # Create a post
 @app.route('/post', methods=['POST'])
 def add_post():
     description = request.json['description']
     authorEmail = request.json['authorEmail']
+    lat = request.json['lat']
+    lng = request.json['lng']
+    timestamp = request.json['timestamp']
 
-    new_post = Post(description, authorEmail)
+    new_post = Post(description, authorEmail, lat, lng, timestamp)
 
     db.session.add(new_post)
     db.session.commit()
@@ -59,7 +71,7 @@ def add_post():
     return post_schema.jsonify(new_post)
 
 # Get all posts
-@app.route('/post', methods=['GET'])
+@app.route('/latest_posts', methods=['GET'])
 def get_posts():
     all_posts = Post.query.all()
     result = posts_schema.dump(all_posts)
@@ -71,16 +83,31 @@ def get_post(id):
     post = Post.query.get(id)
     return post_schema.jsonify(post)
 
+# get data from JSON
+def getDataFromJson():
+    description = request.json['description']
+    authorEmail = request.json['authorEmail']
+    lat = request.json['lat']
+    lng = request.json['lng']
+    timestamp = request.json['timestamp']
+    return [description, authorEmail, lat, lng, timestamp]
+
 # Update a post
 @app.route('/post/<id>', methods=['PUT'])
 def update_post(id):
     post = Post.query.get(id)
-
+    
     description = request.json['description']
     authorEmail = request.json['authorEmail']
+    lat = request.json['lat']
+    lng = request.json['lng']
+    timestamp = request.json['timestamp']
 
     post.description = description
     post.authorEmail = authorEmail
+    post.lat = lat
+    post.lng = lng
+    post.timestamp = timestamp
 
     db.session.commit()
 

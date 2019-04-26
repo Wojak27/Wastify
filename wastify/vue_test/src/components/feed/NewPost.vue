@@ -2,10 +2,10 @@
   <div style="padding-bottom:2rem">
     <div class="box new-post is-rounded">
       
-      <textarea class="textarea" v-model="description" style="margin-bottom:0.5rem; min-width:35rem;" placeholder="What do you want to do?"></textarea>
-      <ul>
-
-        <li>
+      <textarea class="textarea post-text-field" v-model="description" placeholder="What do you want to do?"></textarea>
+      
+      <div class="center-container">
+        <div class="left-container">
           <div class="dropdown is-hoverable">
           <div class="dropdown-trigger">
             <button class="button" aria-haspopup="true" aria-controls="dropdown-menu">
@@ -26,12 +26,15 @@
             </div>
           </div>
         </div>
-        </li>
-        <li><i class="fas fa-images btn-image" /></li>
-        <li><i class="fas fa-location-arrow btn-image"/></li>
-        <li class="submit"><a @click="createPost" class="button is-primary is-inverted is-outlined">Submit Post</a></li>
+        <i class="fas fa-images btn-image" />
+        <i class="fas fa-location-arrow btn-image"/>
+        </div>
+        <a @click="createPost" class="button is-primary is-inverted is-outlined submit">Submit Post</a>
+      </div>
         
-      </ul>
+          
+        
+        </div>
       
     </div>      
   </div>
@@ -43,6 +46,7 @@ import firebase from 'firebase'
 
 export default {
   name: "NewPost",
+  props: ['newPost'],
   data(){
     return{
       description: null,
@@ -68,7 +72,10 @@ export default {
         // specify the object to post
         const post = {
           "description": this.description,
-          "authorEmail": firebase.auth().currentUser.email
+          "authorEmail": firebase.auth().currentUser.email,
+          "lat": 0,
+          "lng":0,
+          "timestamp": Date.now()
         }
 
         // make the post request
@@ -87,6 +94,7 @@ export default {
         console.log("New Post!")
         this.feedback = "You need to fill in all of the fields"
       }
+      this.newPost()
     }
   }
 }
@@ -94,20 +102,42 @@ export default {
 
 <style>
 .new-post{
+  display: flex;
+  flex-direction: column;
   background-color: green;
   padding: 5px;
-  padding-bottom: 40px;
 }
 li {
   float: left;
 }
 
-li .submit {
-  float: right;
+.submit {
+  display: flex;
+  align-self: flex-end;
 }
 
-li .btn-image{
+.btn-image{
   margin: 10px;
   color: white;
+}
+
+.post-text-field{
+  margin-bottom:0.5rem; 
+  min-width:35rem;
+}
+@media screen and (max-width: 600px) {
+  .post-text-field{
+  margin-bottom:0.5rem; 
+  min-width: 10rem;
+  background-color: red;
+  }
+}
+.left-container{
+  display: flex;
+  align-self: flex-start;
+}
+
+.center-container{
+  display: flex;
 }
 </style>

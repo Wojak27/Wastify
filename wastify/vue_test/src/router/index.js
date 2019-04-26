@@ -6,9 +6,10 @@ import Login from "@/components/auth/Login";
 import Messenger from "@/components/messenger/Messenger";
 import GMap from "@/components/map/GMap";
 import NewPost from "@/components/feed/NewPost";
+import ProfilePage from "@/components/profile/ProfilePage";
 import firebase from "firebase";
 
-Vue.use(Router);
+Vue.use(Router)
 
 const router = new Router({
   routes: [
@@ -24,6 +25,14 @@ const router = new Router({
       path: "/map",
       name: "Map",
       component: GMap,
+      meta: {
+        requiresAuth: true
+      }
+    },
+    {
+      path: "/profile",
+      name: "ProfilePage",
+      component: ProfilePage,
       meta: {
         requiresAuth: true
       }
@@ -51,6 +60,7 @@ const router = new Router({
       name: "NewPost",
       component: NewPost
     }
+    
   ]
 });
 

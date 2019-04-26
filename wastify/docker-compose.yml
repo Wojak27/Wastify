@@ -6,9 +6,9 @@ services:
 
   flask:
     restart: always
-    build: ./product
+    build: ./flask
     volumes:
-      - ./product:/usr/src/app
+      - ./flask:/usr/src/app
     ports:
       - 5001:80
     depends_on:

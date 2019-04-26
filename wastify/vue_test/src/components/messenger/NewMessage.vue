@@ -2,7 +2,7 @@
   <div class="new-message">
     <form @submit.prevent="addMessage">
       <label for="new-message">New Message (Enter to add)</label>
-      <input type="text" name="new-message" v-model="newMessage">
+      <input type="text" class="input is-rounded" name="new-message" v-model="newMessage">
       <p class="red-text" v-if="feedback">{{feedback}}</p>
     </form>
   </div>
@@ -13,11 +13,11 @@ import 'bulma/css/bulma.css'
 import db from "@/firebase/init";
 export default {
   name: "NewMessage",
-  props: ["name"],
   data() {
     return {
       newMessage: null,
-      feedback: null
+      feedback: null,
+      name: "Karol"
     };
   },
   methods: {
@@ -31,6 +31,7 @@ export default {
             timestamp: Date.now()
           })
           .catch(err => {
+            console.log("Error adding a message!")
             console.log(err);
             this.feedback = err.message;
           });

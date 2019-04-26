@@ -1,9 +1,17 @@
 <template>
   <div class="hello">
-    <NewPost/>
-    <div v-for="post in posts" :key="post.id">
-      <PostBox :text="post.description" :authorEmail="post.authorEmail"/>
+    <div class="content">
+      <div class="center-div">
+      <NewPost :newPost="getPosts"/>
+        <div v-for="post in posts" :key="post.id">
+          <PostBox :text="post.description" :authorEmail="post.authorEmail" :timestamp="post.timestamp"/>
+        </div>
+      <ProfileBar />
+      
     </div>
+    </div>
+    
+    
     
   </div>
 </template>
@@ -16,6 +24,8 @@ import Tiles from "@/components/Tiles";
 import PostBox from "@/components/feed/PostBox";
 import NewPost from "@/components/feed/NewPost";
 import axios from 'axios'
+import moment from "moment"
+
 export default {
   name: "Feed",
   components: {
@@ -31,23 +41,27 @@ export default {
       posts: []
     };
   },
+  methods: {
+    getPosts(){
+      axios.get('http://localhost:5001/latest_posts')
+      .then(response => {
+        console.log(response.data)
+        console.log(response.data[0])
+        response.data.forEach(element => {
+          this.posts.push({
+            id: element.id,
+            description: element.description,
+            authorEmail: element.authorEmail,
+            timestamp: element.timestamp
+          })
+          console.log(element)
+        });
+      })
+      .catch(error => console.log(error))
+      }
+  },
   created() {
-    console.log("Hello")
-
-    axios.get('http://localhost:5001/post')
-    .then(response => {
-      console.log(response.data)
-      console.log(response.data[0])
-      response.data.forEach(element => {
-        this.posts.push({
-          id: element.id,
-          description: element.description,
-          authorEmail: element.authorEmail
-        })
-        console.log(element)
-      });
-    })
-    .catch(error => console.log(error))
+    this.getPosts()
   },
 };
 </script>
@@ -55,16 +69,47 @@ export default {
 <!-- Add "scoped" attribute to limit CSS to this component only -->
 <style>
 .hello {
+  display: flex;
   justify-content: center;
-  display: inline-block;
+  flex-direction: column;
+  align-self: center;
   text-align: center;
   padding-top: 5rem;
-  max-width: 45rem;
 }
 
 .myfooter {
   bottom: 0;
   width: 100%;
   height: 2.5rem;
+}
+
+
+.content{
+  display: flex;
+  flex-direction: row;
+  align-self: center;
+}
+
+.profile-bar{
+  display: flex;
+  flex: 1;
+  position: fixed;
+
+}
+.center-div{
+  display: flex;
+  flex-direction: column;
+  align-self: center;
+  flex: 2;
+}
+
+
+
+@media screen and (max-width: 600px) {
+  .center-div{
+  display: flex;
+  flex-direction: column;
+  align-self: center;
+}
 }
 </style>
