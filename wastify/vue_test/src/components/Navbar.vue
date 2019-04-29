@@ -17,7 +17,7 @@
             <router-link :to="{name: 'Login'}" v-if="!user">Login</router-link>
           </li>
           <li v-if="user" class="navbar-item">
-            <router-link :to="{name: 'Map'}" v-if="user">Map</router-link>
+            <router-link :to="{name: 'Map'}" v-if="user"><p class="has-text-white">Map</p></router-link>
           </li>
 
           <li v-if="user" class="navbar-item">

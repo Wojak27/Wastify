@@ -29,9 +29,13 @@
         <i class="fas fa-images btn-image" />
         <i class="fas fa-location-arrow btn-image"/>
         </div>
+
         <a @click="createPost" class="button is-primary is-inverted is-outlined submit">Submit Post</a>
-      </div>
         
+      </div>
+      <div class="create-post-button">
+        
+      </div>
           
         
         </div>
@@ -132,12 +136,19 @@ li {
   background-color: red;
   }
 }
+.create-post-button{
+  display: flex;
+  align-self: flex-end;
+}
 .left-container{
   display: flex;
+  flex-direction: row;
   align-self: flex-start;
 }
 
 .center-container{
   display: flex;
+  flex-direction: row;
+  justify-content:space-between;
 }
 </style>

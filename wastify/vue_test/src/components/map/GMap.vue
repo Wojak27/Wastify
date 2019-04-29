@@ -14,6 +14,7 @@
 import firebase from "firebase";
 import "bulma/css/bulma.css";
 import db from "@/firebase/init";
+import axios from "axios";
 
 
 export default {

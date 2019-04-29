@@ -30,7 +30,7 @@
         or...
       </div>
       <div class="field center">
-        <button class="button is-rounded" @click="loginWithGoogle"><img src="https://developers.google.com/identity/images/g-logo.png" class="googleImage"> Sign up with Google</button>
+        <button class="button is-rounded"><img src="https://developers.google.com/identity/images/g-logo.png" class="googleImage"> Sign up with Google</button>
       </div>
       </form>
   </div>
@@ -39,6 +39,7 @@
 import slugify from "slugify";
 import db from "@/firebase/init";
 import firebase from "firebase";
+import axios from "axios";
 
 export default {
   name: "Signup",
@@ -61,6 +62,44 @@ export default {
           this.$router.push({ name: "Login" });
         });
     },
+    createUserinRefDatabase(){
+        console.log("New User created!")
+        
+        console.log(firebase.auth().currentUser.email)
+        console.log(firebase.auth().currentUser.user_id)
+        console.log(firebase.auth().currentUser.displayName)
+        console.log(Date.now())
+
+        var user = firebase.auth().currentUser
+
+        var username = this.alias;
+        var email = user.email;
+        var uid = user.uid;
+
+        const Url = 'http://localhost:5001/user/create/'
+        // specify the object to post
+        const new_user = {
+          "firebase_id": uid,
+          "username": username,
+          "emailAddress": email,
+          "creation_time": Date.now()
+        }
+
+        // make the post request
+        // This is how you do it:
+        axios.post(Url,new_user)
+        .then(response => {
+          this.description = null
+            console.log("Response from the database")
+            console.log(response)
+          })
+        .catch(error => console.log(error))
+
+        if(feedback){
+          feedback = null
+        }
+      
+    },
     signup() {
       if (this.alias && this.email && this.password && this.repeatedPassword) {
         this.slug = slugify(this.alias, {
@@ -82,6 +121,8 @@ export default {
                 .then(cred => {
                   // cred.user to get a user
 
+
+                  // creating this new user in the firebase database
                   ref
                     .set({
                       alias: this.alias,
@@ -89,8 +130,13 @@ export default {
                       user_id: cred.user.uid
                     })
                     .then(() => {
+                      console.log("Pushing to Feed")
                       this.$router.push({ name: "Feed" });
                     });
+
+                  //creating a new user in the local database
+                  this.createUserinRefDatabase()
+                  
                   this.feedback = null;
                   this.alias = null;
                   this.password = null;

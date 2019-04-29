@@ -32,7 +32,6 @@ export default {
 <style>
 .hello {
   padding-top: 5rem;
-  background-color:yellow;
   padding-bottom: 2rem;
 }
 

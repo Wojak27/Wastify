@@ -2,17 +2,29 @@
   <div class="hello">
     <div class="content">
       <div class="center-div">
-      <NewPost :newPost="getPosts"/>
-        <div v-for="post in posts" :key="post.id">
-          <PostBox :text="post.description" :authorEmail="post.authorEmail" :timestamp="post.timestamp"/>
+        <div class="top-container">
+          <NewPost :newPost="getPosts"/>
         </div>
-      <ProfileBar />
-      
+        <div class="bottom-container">
+          <div class="feed-post-container">
+            <div v-for="post in posts" :key="post.id">
+            <PostBox :text="post.description" :authorEmail="post.authorEmail" :timestamp="post.timestamp"/>
+          </div>
+          <PostBox :text="fake_description" :authorEmail="fake_email" :timestamp="fake_email"/>
+          <PostBox :text="fake_description" :authorEmail="fake_email" :timestamp="fake_email"/>
+          <PostBox :text="fake_description" :authorEmail="fake_email" :timestamp="fake_email"/>
+          <PostBox :text="fake_description" :authorEmail="fake_email" :timestamp="fake_email"/>
+          <PostBox :text="fake_description" :authorEmail="fake_email" :timestamp="fake_email"/>
+          <PostBox :text="fake_description" :authorEmail="fake_email" :timestamp="fake_email"/>
+          <PostBox :text="fake_description" :authorEmail="fake_email" :timestamp="fake_email"/>
+          <PostBox :text="fake_description" :authorEmail="fake_email" :timestamp="fake_email"/>
+          <PostBox :text="fake_description" :authorEmail="fake_email" :timestamp="fake_email"/>
+          <PostBox :text="fake_description" :authorEmail="fake_email" :timestamp="fake_email"/>
+          </div>
+        <ProfileBar />
+        </div>          
+      </div>
     </div>
-    </div>
-    
-    
-    
   </div>
 </template>
 
@@ -38,7 +50,11 @@ export default {
   data() {
     return {
       msg: "kjdsbnfkjsdbakfjbsdakjfbflsdaijbflkjsadbfkjsabdfklhbsadlkfhbdsalkhbfliabdhsflksdhabdsfklb dbs kjbdsakj bf ksdjb kbdsfk jbsdakjbf sdkjb kjdsba klbfdslib ilsbd ilbfsdali fbjsdil",
-      posts: []
+      posts: [],
+      username: null,
+      fake_description: "This is a fake description with a fake meaning created by Karol Wojtulewicz for test purpouses of his newly created, soon to be a big hit website to unite all of the people in cleaning purpouses",
+      fake_email: "karol@wojtulewicz.com",
+      fake_timestamp: "234567654321324"
     };
   },
   methods: {
@@ -62,6 +78,7 @@ export default {
   },
   created() {
     this.getPosts()
+    
   },
 };
 </script>
@@ -96,11 +113,23 @@ export default {
   position: fixed;
 
 }
+
+
+.bottom-container{
+  display: flex;
+  align-self: flex-end;
+  flex-direction: row;
+}
+.feed-post-container{
+  display: flex;
+  flex-direction: column;
+  padding-right: 0.5rem;
+}
 .center-div{
   display: flex;
   flex-direction: column;
   align-self: center;
-  flex: 2;
+  max-width: 45rem;
 }
 
 

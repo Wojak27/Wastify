@@ -6,7 +6,7 @@
       </div>
 
       <div class="bottomContainerProfile">
-        <h3>Agata Nowaczyk</h3>
+        <h3>{{username}}</h3>
         <p>I like trash</p>
         <p>Tell me about your ambitions with trash!</p>
       </div>
@@ -18,11 +18,19 @@
 </template>
 
 <script>
+import firebase from 'firebase'
+import "bulma/css/bulma.css";
 export default {
   name: "ProfileBar",
+  //props:['username'],
   data() {
-    return {};
-  }
+    return {
+      username: "Username"
+    };
+  },
+  created() {
+    //username = firebase.auth().currentUser.displayName
+  },
 };
 </script>
 
@@ -33,9 +41,9 @@ export default {
 .boxProfile {
   width: 13rem;
   height: 600px;
-  margin: 0px 0px 0px 600px;
+  margin: 0px 0px 0px 0;
   background-color: rgb(219, 255, 236);
-  border-radius: 20px;
+  border-radius: 10px;
   border-style: solid;
   border-width: 1px;
   border-color: #53bc88;
