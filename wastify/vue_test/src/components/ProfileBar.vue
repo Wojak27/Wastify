@@ -1,18 +1,20 @@
 <template>
   <div class="profileDiv">
-    <div class="boxProfile">
+    <div class="boxProfile" >
       <div class="topContainerProfile">
-        <img src="../assets/trash.jpg" alt class="topImageProfile">
+        <img src="https://images.unsplash.com/photo-1528920304568-7aa06b3dda8b?ixlib=rb-1.2.1&ixid=eyJhcHBfaWQiOjEyMDd9&w=1000&q=80" alt class="topImageProfile" style="object-fit: cover;">
       </div>
 
-      <div class="bottomContainerProfile">
-        <h3>{{username}}</h3>
+      <div class="bottomContainerProfile" >
+        <a class="button is-white" @click="goToUserProfile">{{userEmail}}</a>
         <p>I like trash</p>
         <p>Tell me about your ambitions with trash!</p>
+        
       </div>
       <div class="imageDivProfile">
-        <img src="../assets/profile_picture.jpg" alt class>
+        <img src="../assets/profile_picture.jpg" alt class style="object-fit: cover;">
       </div>
+      
     </div>
   </div>
 </template>
@@ -22,11 +24,16 @@ import firebase from 'firebase'
 import "bulma/css/bulma.css";
 export default {
   name: "ProfileBar",
-  //props:['username'],
+  props:['userEmail'],
   data() {
     return {
       username: "Username"
     };
+  },
+  methods: {
+    goToUserProfile(){
+      this.$router.push({ name: "ProfilePage", params: { authorEmail: this.userEmail } });
+    },
   },
   created() {
     //username = firebase.auth().currentUser.displayName
@@ -49,13 +56,15 @@ export default {
   border-color: #53bc88;
   overflow: hidden;
   position: relative;
+  margin-top: 1rem;
 }
 .imageDivProfile {
   border-radius: 50%;
   height: 100px;
   width: 100px;
-  border-color: white;
-  border-width: 20px;
+  border-color: lightcyan;
+  border-width: 2px;
+  border-style: solid;
   margin: 0 auto;
   overflow: hidden;
   align-content: center;
@@ -66,7 +75,7 @@ export default {
 .imageDivProfile img {
   width: 200px;
   height: 110px;
-  margin: -10px 0 0 -50px;
+  margin: 0px 0 0 0px;
   border-width: 5px;
 }
 .bottomContainerProfile {
@@ -82,6 +91,8 @@ export default {
   background-color: red;
   height: 200px;
   top: 0px;
+  border-style: solid;
+  border-color: green;
 }
 .topContainerProfile img {
   -webkit-filter: blur(1px); /* Safari 6.0 - 9.0 */

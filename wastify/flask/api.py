@@ -3,6 +3,7 @@ from flask import Blueprint, jsonify, request
 from flask_restful import Resource, Api
 from flask_cors import CORS
 from flask_sqlalchemy import SQLAlchemy
+from sqlalchemy import desc
 from flask_marshmallow import Marshmallow
 import os
 
@@ -28,31 +29,74 @@ db = SQLAlchemy(app)
 # init ma
 ma = Marshmallow(app)
 
+########################## SCHEMAS #######################################
+
+# Here all of the post followers are contained
+# the user_id also works as a reference to an actual user
+#class PostFollowers(db.Model):
+#    id = db.Column(db.Integer, primary=True) 
+#    user_id = db.Column(db.String(200), db.ForeignKey('user.firebase_id'), nullable=False)
+
 # post Class/Model
 class Post(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     #name = db.Column(db.String(100), unique=True)
-    authorEmail = db.Column(db.String(200))
-    description = db.Column(db.String(200))
-
+    authorEmail = db.Column(db.String(200), db.ForeignKey('user.firebase_id'), nullable=False)
+    description = db.Column(db.Text)
     #Location of the post/poster, every post has purpouse...
     lat = db.Column(db.Integer)
     lng = db.Column(db.Integer)
     timestamp = db.Column(db.Integer)
-
+    timeOfTheEvent = db.Column(db.String(200))
     # add date, time, location, imgSrc and name 
 
+    # removed the lat and lng from here, have got to remove it from the 
+    # backend as well
     def __init__(self,description, authorEmail, lat, lng, timestamp):
         self.description = description
         self.authorEmail = authorEmail
         self.lat = lat
         self.lng = lng
         self.timestamp = timestamp
-
+    
 # post Schema
 class PostSchema(ma.Schema):
      class Meta:
          fields = ('id', 'description', 'authorEmail', 'lat', 'lng', 'timestamp')
+
+
+# User Class/Model
+class User(db.Model):
+    firebase_id = db.Column(db.String(200), primary_key=True, nullable = False)
+    username = db.Column(db.String(200), unique=True, nullable = False)
+    emailAddress = db.Column(db.String(200), nullable = False)
+    # Here we can add firends and some extra content data
+    #followers = db.Column(db) # all of the followers
+    #following = db.relationship('User', backref='followe', lazy=True)
+    description = db.Column(db.Text, nullable=True)
+    motto = db.Column(db.Text, nullable = True)
+    #likedPosts = db.relationship('Post', backref='hasLiked', lazy=True, nullable = True)
+    #creating the relation to the post
+    posts = db.relationship('Post', backref='author', lazy=True)
+
+    # Creation time of the account
+    creation_time = db.Column(db.Integer, nullable = False)
+
+    # add date, time, location, imgSrc and username 
+
+    def __init__(self,firebase_id, username, emailAddress, creation_time):
+        self.firebase_id = firebase_id
+        self.username = username
+        self.emailAddress = emailAddress
+        self.creation_time = creation_time
+
+# User Schema
+class UserSchema(ma.Schema):
+     class Meta:
+         fields = ('firebase_id', 'username', 'emailAddress', 'creation_time')
+
+
+########################## THE API #######################################
 
 # Create a post
 @app.route('/post', methods=['POST'])
@@ -63,7 +107,6 @@ def add_post():
     lat = request.json['lat']
     lng = request.json['lng']
     timestamp = request.json['timestamp']
-
     new_post = Post(description, authorEmail, lat, lng, timestamp)
 
     db.session.add(new_post)
@@ -74,14 +117,20 @@ def add_post():
 # Get all posts
 @app.route('/latest_posts', methods=['GET'])
 def get_posts():
-    all_posts = Post.query.all()
+    all_posts = Post.query.order_by(desc(Post.timestamp)).all()
     result = posts_schema.dump(all_posts)
     return jsonify(result.data)
+
+# Get a page from the feed 
+@app.route(/page/<nr>, methods=['GET'])
+def getPage(nr):
+    print("Hello")
 
 #Get one post
 @app.route('/post/<id>', methods=['GET'])
 def get_post(id):
     post = Post.query.get(id)
+    
     return post_schema.jsonify(post)
 
 # get data from JSON
@@ -103,7 +152,6 @@ def update_post(id):
     lat = request.json['lat']
     lng = request.json['lng']
     timestamp = request.json['timestamp']
-
     post.description = description
     post.authorEmail = authorEmail
     post.lat = lat
@@ -115,9 +163,9 @@ def update_post(id):
     return post_schema.jsonify(post)
 
 # Delete post
-@app.route('/post/<firebase_id>', methods=['DELETE'])
+@app.route('/post/<id>', methods=['DELETE'])
 def delete_post(firebase_id):
-    post = Post.query.get(firebase_id)
+    post = Post.query.get(id)
     db.session.delete(post)
 
     db.session.commit()
@@ -130,28 +178,6 @@ post_schema = PostSchema(strict=True)
 posts_schema = PostSchema(many=True, strict=True)
 
 
-# User Class/Model
-class User(db.Model):
-    firebase_id = db.Column(db.String(200), primary_key=True)
-    username = db.Column(db.String(200), unique=True)
-    emailAddress = db.Column(db.String(200))
-    # Here we can add firends and some extra content data
-
-    # Creation time of the account
-    creation_time = db.Column(db.Integer)
-
-    # add date, time, location, imgSrc and username 
-
-    def __init__(self,firebase_id, username, emailAddress, creation_time):
-        self.firebase_id = firebase_id
-        self.username = username
-        self.emailAddress = emailAddress
-        self.creation_time = creation_time
-
-# User Schema
-class UserSchema(ma.Schema):
-     class Meta:
-         fields = ('firebase_id', 'username', 'emailAddress', 'creation_time')
 
 # Create a User
 @app.route('/user/create/', methods=['POST'])
@@ -181,6 +207,15 @@ def get_Users():
 def get_User(firebase_id):
     user = User.query.get(firebase_id)
     return user_schema.jsonify(user)
+
+#Get currently signed in User
+@app.route('/current_user/<firebase_id>', methods=['GET'])
+def get_signedIn_User(firebase_id):
+    user = User.query.get(firebase_id)
+    return user_schema.jsonify(user)
+
+# TODO: Get all of the post in the neighbearhood (radious or something similar)
+# TODO: aa$
 
 
 # Update a User

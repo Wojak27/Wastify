@@ -3,26 +3,25 @@
     <div class="content">
       <div class="center-div">
         <div class="top-container">
-          <NewPost :newPost="getPosts"/>
+          <InfoBox class="animated bounceInDown" />
+          <NewPost :method="getPosts" style="position:fixed; width:45rem; zIndex:1" class="animated bounceInDown"/>
         </div>
         <div class="bottom-container">
+          
           <div class="feed-post-container">
+            <div class="loading-container">
+              <p class="is-size-7 has-text-grey" v-if="loading" >Loading new posts...</p>
+            </div>
             <div v-for="post in posts" :key="post.id">
-            <PostBox :text="post.description" :authorEmail="post.authorEmail" :timestamp="post.timestamp"/>
+            <PostBox :text="post.description"  :authorEmail="post.authorEmail" :timestamp="post.timestamp" style="width:31rem;" class="animated swing"/>
           </div>
-          <PostBox :text="fake_description" :authorEmail="fake_email" :timestamp="fake_email"/>
-          <PostBox :text="fake_description" :authorEmail="fake_email" :timestamp="fake_email"/>
-          <PostBox :text="fake_description" :authorEmail="fake_email" :timestamp="fake_email"/>
-          <PostBox :text="fake_description" :authorEmail="fake_email" :timestamp="fake_email"/>
-          <PostBox :text="fake_description" :authorEmail="fake_email" :timestamp="fake_email"/>
-          <PostBox :text="fake_description" :authorEmail="fake_email" :timestamp="fake_email"/>
-          <PostBox :text="fake_description" :authorEmail="fake_email" :timestamp="fake_email"/>
-          <PostBox :text="fake_description" :authorEmail="fake_email" :timestamp="fake_email"/>
-          <PostBox :text="fake_description" :authorEmail="fake_email" :timestamp="fake_email"/>
-          <PostBox :text="fake_description" :authorEmail="fake_email" :timestamp="fake_email"/>
+          
+          <BigPostBox />
           </div>
-        <ProfileBar />
-        </div>          
+        <ProfileBar :userEmail="userEmail" style="position:fixed; margin-left : 32rem; width:45rem; zIndex:1" class="animated bounceInDown"/>
+        
+        </div>     
+             
       </div>
     </div>
   </div>
@@ -34,9 +33,14 @@ import ProfileBar from "@/components/ProfileBar";
 import Footer from "@/components/Footer";
 import Tiles from "@/components/Tiles";
 import PostBox from "@/components/feed/PostBox";
+import MyPostBox from "@/components/feed/MyPostBox";
 import NewPost from "@/components/feed/NewPost";
+import BigPostBox from "@/components/feed/BigPostBox";
+import InfoBox from "@/components/feed/InfoBox";
 import axios from 'axios'
 import moment from "moment"
+import firebase from "firebase"
+import animate from "animate.css"
 
 export default {
   name: "Feed",
@@ -45,7 +49,9 @@ export default {
     Footer,
     Tiles,
     PostBox,
-    NewPost
+    NewPost,
+    BigPostBox,
+    InfoBox
   },
   data() {
     return {
@@ -54,24 +60,39 @@ export default {
       username: null,
       fake_description: "This is a fake description with a fake meaning created by Karol Wojtulewicz for test purpouses of his newly created, soon to be a big hit website to unite all of the people in cleaning purpouses",
       fake_email: "karol@wojtulewicz.com",
-      fake_timestamp: "234567654321324"
+      fake_timestamp: "234567654321324",
+      userEmail: firebase.auth().currentUser.email,
+      loading: false,
     };
   },
   methods: {
     getPosts(){
+      this.loading = true
       axios.get('http://localhost:5001/latest_posts')
       .then(response => {
         console.log(response.data)
         console.log(response.data[0])
+        this.posts = []
         response.data.forEach(element => {
+          var timestamp
+          console.log("Timestamp")
+          console.log(Date.now() - element.timestamp)
+          console.log(element.timestamp)
+          console.log(Date.now())
+          if(Date.now() - element.timestamp < 3758207){
+            timestamp = "Less than an your ago"
+          }else{
+            timestamp = moment(element.timestamp).format('MMMM Do YYYY, h:mm:ss a')
+          }
           this.posts.push({
             id: element.id,
             description: element.description,
             authorEmail: element.authorEmail,
-            timestamp: element.timestamp
+            timestamp: timestamp
           })
           console.log(element)
         });
+        this.loading = false
       })
       .catch(error => console.log(error))
       }
@@ -85,6 +106,9 @@ export default {
 
 <!-- Add "scoped" attribute to limit CSS to this component only -->
 <style>
+.loading-container{
+  height: 1rem;
+}
 .hello {
   display: flex;
   justify-content: center;
@@ -119,6 +143,7 @@ export default {
   display: flex;
   align-self: flex-end;
   flex-direction: row;
+  margin-top: 13rem;
 }
 .feed-post-container{
   display: flex;

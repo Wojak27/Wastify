@@ -13,27 +13,55 @@ import 'bulma/css/bulma.css'
 import db from "@/firebase/init";
 export default {
   name: "NewMessage",
+  props: ["author", "recipient"],
   data() {
     return {
       newMessage: null,
       feedback: null,
-      name: "Karol"
+      
     };
   },
   methods: {
     addMessage() {
       if (this.newMessage) {
+        var chatDBReference = null
+        if(this.recipient > this.author){
+          chatDBReference = this.recipient+this.author
+        }else{
+          chatDBReference = this.author+this.recipient
+        }
         console.log("Adding new message");
-        db.collection("messages")
+        db.collection("messenger").doc(chatDBReference).collection("messages")
           .add({
             content: this.newMessage,
-            name: this.name,
+            author: this.author,
             timestamp: Date.now()
           })
           .catch(err => {
             console.log("Error adding a message!")
             console.log(err);
             this.feedback = err.message;
+          });
+        // Adding a reference in the authors table
+        db.collection("conversations").doc(this.author).collection("users").add({
+          id:this.recipient,
+          last_contacted: Date.now()
+        }).catch(err => {
+            console.log("Error adding a message!")
+            console.log(err);
+            this.feedback = err.message;
+            
+          });
+
+        // Adding a reference in the recipients table
+        db.collection("conversations").doc(this.recipient).collection("users").add({
+          id:this.author,
+          last_contacted: Date.now()
+        }).catch(err => {
+            console.log("Error adding a message!")
+            console.log(err);
+            this.feedback = err.message;
+            
           });
         this.newMessage = null;
         this.feedback = null;

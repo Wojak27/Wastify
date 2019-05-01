@@ -11,13 +11,13 @@
 
         <ul class="navbar-end field right">
           <li class="navbar-item">
-            <router-link :to="{name: 'Signup'}" v-if="!user">Signup</router-link>
+            <router-link :to="{name: 'Signup'}" v-if="!user"><p class="has-text-white">Signup</p></router-link>
           </li>
           <li class="navbar-item">
-            <router-link :to="{name: 'Login'}" v-if="!user">Login</router-link>
+            <router-link :to="{name: 'Login'}" v-if="!user"><p class="has-text-white">Login</p></router-link>
           </li>
           <li v-if="user" class="navbar-item">
-            <router-link :to="{name: 'Map'}" v-if="user"><p class="has-text-white">Map</p></router-link>
+            <router-link :to="{name: 'Map'}" v-if="user"><p class="has-text-white">Explore</p></router-link>
           </li>
 
           <li v-if="user" class="navbar-item">
@@ -26,15 +26,15 @@
           <li v-if="user" class="navbar-item">
 
 
-    <div class="navbar-item has-dropdown is-hoverable">
-        <a class="navbar-link" href="https://bulma.io/documentation/overview/start/">
-          
-        </a>
-        <div class="navbar-dropdown is-boxed">
+    <div class="navbar-item has-dropdown is-hoverable" >
+        <span class="icon is-small">
+        <i class="fas fa-angle-down" aria-hidden="true"></i>
+      </span>
+        <div class="navbar-dropdown is-boxed is-right">
           <router-link class="navbar-item" :to="{name: 'Map'}" v-if="user">Map</router-link>
           <router-link class="navbar-item" :to="{name: 'Feed'}" v-if="user">Feed</router-link>
           <router-link class="navbar-item" :to="{name: 'Messenger'}" v-if="user">Messenger</router-link>
-          <router-link class="navbar-item" :to="{name: 'ProfilePage'}" v-if="user">Profile</router-link>
+          <router-link class="navbar-item" :to="{name: 'ProfilePage'}" v-if="user">My Profile</router-link>
           
           <hr class="navbar-divider">
           <a class="navbar-item" href="" @click="logout">

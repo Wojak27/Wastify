@@ -1,5 +1,6 @@
 <template>
-  <div class="box login container">
+<section class="hero is-fullheight my-section">
+  <div class="box login container animated bounceInUp">
     <form @submit.prevent="login" class="card-panel">
       <h2 class="center deep-purple-text"> {{login_text}}</h2>
       <div class="field">
@@ -37,12 +38,14 @@
       <p>
         or...
       </p>
-      <div class="field">
+      
+    </form>
+    <div class="field">
         
         <button class="button is-rounded" @click="loginWithGoogle"><img src="https://developers.google.com/identity/images/g-logo.png" class="googleImage"> Sign in with Google</button>
       </div>
-    </form>
   </div>
+</section>
 </template>
 
 <script>
@@ -50,6 +53,8 @@ import firebase from 'firebase'
 import 'bulma/css/bulma.css'
 import axios from 'axios'
 import request from 'request'
+import "bulma/css/bulma.css";
+import animate from "animate.css"
 
 export default {
   name: 'Login',
@@ -96,24 +101,6 @@ export default {
     logout() {
       firebase.auth().signOut();
     },
-    checkConnection(){
-      //fetch(':5001/books').then((response)=>{console.log(response)}).then(json => {
-      //  console.log(json)
-      //})
-      var bodyText
-      const request = require('request');
-      request('http://localhost:5001/app', function (error, response, body) {
-        console.error('error:', error); // Print the error if one occurred
-        console.log('statusCode:', response && response.statusCode); // Print the response status code if a response was received
-        console.log('body:', body); // Print the HTML for the Google homepage.
-        bodyText = body
-        console.log(typeof(bodyText))
-        self.login_text = bodyText
-      });
-      
-
-
-    },
     changeTitleText(){
       self.login_text = "Hello World"
       console.log(self.login_text)
@@ -121,18 +108,25 @@ export default {
   },
   created() {
     this.logout()
-    this.checkConnection()
   },
-  mounted() {
-    this.checkConnection()
-  },
+
 };
 </script>
 
 <style>
+
+.my-section{
+  background-color: white;
+  background-image: url("http://www.broward.org/GoGreen/Municipalities/PublishingImages/468457117%20-%20handprint.jpg");
+  background-repeat: no-repeat;
+  background-attachment: fixed;
+  background-size: cover;
+  background-position: 50% 50%;
+}
+
 .login {
   max-width: 400px;
-  margin-top: 60px;
+  margin-top: 15rem;
 }
 
 .login h2 {
@@ -144,5 +138,16 @@ export default {
 
 .googleImage{
   height: 20px;
+}
+
+.login_signup_container{
+  background-color: white;
+  padding-top: 10rem;
+  
+  background-image: url("http://www.broward.org/GoGreen/Municipalities/PublishingImages/468457117%20-%20handprint.jpg");
+  background-repeat: no-repeat;
+  background-attachment: fixed;
+  background-size: cover;
+  background-position: 50% 50%;
 }
 </style>

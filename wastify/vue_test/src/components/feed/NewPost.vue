@@ -1,7 +1,9 @@
 <template>
   <div style="padding-bottom:2rem">
     <div class="box new-post is-rounded">
-      
+      <div class="control">
+        <input class="input is-primary" type="text" placeholder="Title">
+      </div>
       <textarea class="textarea post-text-field" v-model="description" placeholder="What do you want to do?"></textarea>
       
       <div class="center-container">
@@ -50,7 +52,9 @@ import firebase from 'firebase'
 
 export default {
   name: "NewPost",
-  props: ['newPost'],
+  props: {
+    method: { type: Function },
+  },
   data(){
     return{
       description: null,
@@ -74,20 +78,26 @@ export default {
 
         const Url = 'http://localhost:5001/post'
         // specify the object to post
+
+        var min=0; 
+        var max=50;  
+        var randomLat = Math.random() * (+max - +min) + +min;
+        var randomLng = Math.random() * (+max - +min) + +min;  
         const post = {
           "description": this.description,
           "authorEmail": firebase.auth().currentUser.email,
-          "lat": 0,
-          "lng":0,
+          "lat": randomLat,
+          "lng":randomLng,
           "timestamp": Date.now()
         }
-
+        this.description = null
         // make the post request
         // This is how you do it:
         axios.post(Url,post)
         .then(response => {
-          this.description = null
+          
           //console.log(response)
+          this.method()
           })
         .catch(error => console.log(error))
 
@@ -98,7 +108,7 @@ export default {
         console.log("New Post!")
         this.feedback = "You need to fill in all of the fields"
       }
-      this.newPost()
+      
     }
   }
 }

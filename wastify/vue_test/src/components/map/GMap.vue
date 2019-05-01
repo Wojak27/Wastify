@@ -1,12 +1,17 @@
 <template>
-  <div class="hello">
-    <div class="box my_map_container">
-      <i class="is-large">Add an event</i>
-    <div class="google-map is-marginless" id="map">
+  <div class="hello2">
+    <div class="box my_map_container animated bounceInUp">
+        <i class="is-large">Add an event</i>
+      <div class="google-map is-marginless" id="map">
+      </div>
+      <span class="button is-info map-buttons is-rounded"><i class="fas fa-map-pin" style="margin-right:5px"></i>   Mark and Create an Event</span>
+      <span class="button is-primary map-buttons is-rounded"><i class="fas fa-location-arrow" style="margin-right:5px"></i>    Create Event With this Position</span>
+      <div class="post-area box" v-if="title">
+        {{title}}
+      </div>
+    
     </div>
-    <span class="button is-info map-buttons is-rounded"><i class="fas fa-map-pin" style="margin-right:5px"></i>   Mark and Create an Event</span>
-    <span class="button is-primary map-buttons is-rounded"><i class="fas fa-location-arrow" style="margin-right:5px"></i>    Create Event With this Position</span>
-    </div>
+    
   </div>
 </template>
 
@@ -23,13 +28,14 @@ export default {
     return {
       lat: 53,
       lng: -2,
-      posts:[]
+      posts:[],
+      title: null
     };
   },
   mounted() {
     //get current user
     let credentials = firebase.auth().currentUser;
-
+    this.renderMap();
     //get user geolocation
     if (navigator.geolocation) {
       navigator.geolocation.getCurrentPosition(
@@ -60,7 +66,7 @@ export default {
           console.log("Render map error")
           console.log(err.message);
         },
-        { maximumAge: 60000, timeout: 3000 }
+        { maximumAge: 60000, timeout: 6000 }
       );
     } else {
       //position center by default values
@@ -75,18 +81,28 @@ export default {
         console.log(response.data[0])
         response.data.forEach(element => {
             console.log("Placing markers")
+            console.log(element)
+            var icon = {
+                url: "http://www.newdesignfile.com/postpic/2014/07/map-icon_150412.png", // url
+                scaledSize: new google.maps.Size(50, 50), // scaled size
+                origin: new google.maps.Point(0,0), // origin
+                anchor: new google.maps.Point(0, 0) // anchor
+            };
             let marker = new google.maps.Marker({
               position: {
                 lat: element.lat,
                 lng: element.lng
               },
-              icon: "https://maps.google.com/mapfiles/kml/shapes/parking_lot_maps.png",
+              icon: icon,
               map: map,
-              title: data.user_id
+              title: element.description,
+              
             });
             //add click event to marker
             marker.addListener("click", () => {
-              console.log("You clicked on the marker!");
+              this.title = marker.getTitle()
+              console.log("You clicked on the marker: "+this.title);
+              
             });
         });
       })
@@ -131,13 +147,15 @@ export default {
                   lat: data.geolocation.lat,
                   lng: data.geolocation.log
                 },
-                icon: "https://maps.google.com/mapfiles/kml/shapes/parking_lot_maps.png",
+                // icon: "https://img.icons8.com/wired/2x/map.png",
                 map: map,
-                title: data.user_id
+                title: data.user_id,
+                animation: google.maps.Animation.DROP
+
               });
               //add click event to marker
               marker.addListener("click", () => {
-                console.log("You clicked on the marker!");
+                console.log("You clicked on the marker: "+marker.title);
               });
             }
           });
@@ -149,6 +167,9 @@ export default {
 </script>
 
 <style>
+.post-area{
+  
+}
 .google-map {
   width: 100%;
   height: 90%;
@@ -164,8 +185,18 @@ export default {
   margin: 0 auto;
   
 }
-.hello {
-
+@media screen and (max-width: 600px) {
+  .my_map_container{
+  background-color: green;
+  width: 100%;
+  height: 20rem;
+  position: relative;
+  margin: 0 auto;
+  
+}
+}
+.hello2 {
+  margin-top: 5rem;
 }
 
 .map-buttons{

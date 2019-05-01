@@ -33,6 +33,7 @@ const router = new Router({
       path: "/profile",
       name: "ProfilePage",
       component: ProfilePage,
+      props: true,
       meta: {
         requiresAuth: true
       }
@@ -41,6 +42,7 @@ const router = new Router({
       path: "/messenger",
       name: "Messenger",
       component: Messenger,
+      props: true,
       meta: {
         requiresAuth: true
       }

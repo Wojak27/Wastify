@@ -1,5 +1,6 @@
 <template>
-  <div class="signup container box">
+ <section class="hero is-fullheight my-section">
+  <div class="signup container box  animated bounceInUp">
     <form @submit.prevent="signup" class="card-panel">
       <h2 class="center deep-purple-text">Signup</h2>
       <div class="field">
@@ -29,17 +30,23 @@
         <button class="button is-rounded">Signup</button><br>
         or...
       </div>
-      <div class="field center">
-        <button class="button is-rounded"><img src="https://developers.google.com/identity/images/g-logo.png" class="googleImage"> Sign up with Google</button>
-      </div>
       </form>
+      <div class="field g-signin2" data-onsuccess="onSignIn">
+        
+        <button class="button is-rounded"><img src="https://developers.google.com/identity/images/g-logo.png" class="googleImage"> Sign in with Google</button>
+      </div>
+      <div class="g-signin2" data-onsuccess="onSignIn"></div>
+
+
   </div>
+ </section>
 </template>
 <script>
 import slugify from "slugify";
 import db from "@/firebase/init";
 import firebase from "firebase";
 import axios from "axios";
+import animate from "animate.css"
 
 export default {
   name: "Signup",
@@ -156,17 +163,39 @@ export default {
         this.feedback = "You must enter a all fields";
       }
     },
-    created() {
-      this.logout();
-    }
+    onSignIn(googleUser) {
+        // Useful data for your client-side scripts:
+        var profile = googleUser.getBasicProfile();
+        console.log("ID: " + profile.getId()); // Don't send this directly to your server!
+        console.log('Full Name: ' + profile.getName());
+        console.log('Given Name: ' + profile.getGivenName());
+        console.log('Family Name: ' + profile.getFamilyName());
+        console.log("Image URL: " + profile.getImageUrl());
+        console.log("Email: " + profile.getEmail());
+
+        // The ID token you need to pass to your backend:
+        var id_token = googleUser.getAuthResponse().id_token;
+        console.log("ID Token: " + id_token);
+      }
+
   }
 };
 </script>
 
 <style>
+
+.my-section{
+  background-color: white;
+  background-image: url("http://www.broward.org/GoGreen/Municipalities/PublishingImages/468457117%20-%20handprint.jpg");
+  background-repeat: no-repeat;
+  background-attachment: fixed;
+  background-size: cover;
+  background-position: 50% 50%;
+}
+
 .signup {
   max-width: 400px;
-  margin-top: 60px;
+  margin-top: 15rem;
 }
 .signup h2 {
   font-size: 2.4em;
