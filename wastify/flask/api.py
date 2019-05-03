@@ -114,7 +114,7 @@ def add_post():
     timestamp = request.json['timestamp']
     imageReference = request.json['imageReference']
 
-    new_post = Post(description, authorEmail, lat, lng, timestamp)
+    new_post = Post(description, authorEmail, lat, lng, timestamp, imageReference)
 
     db.session.add(new_post)
     db.session.commit()

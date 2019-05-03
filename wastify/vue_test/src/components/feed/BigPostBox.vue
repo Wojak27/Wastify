@@ -1,12 +1,14 @@
 <template>
-  <div class="box is-paddingless" style="overflow:hidden; max-width:31rem;">
+  <div class="box is-paddingless" style="overflow:hidden; max-width:31rem; margin-bottom: 2rem;">
+    
       <div class="img-container is-paddingless">
-        <img src="../../assets/trash.jpg" class="img-background" alt style="object-fit: cover">
+        <figure><img src="../../assets/trash.jpg" class="img-background" alt style="object-fit: cover"></figure>
+        <span>Hover</span>
       </div>
       <div class="header-container">
         <div class="left-div">
             Alina Kovalska<br/>
-            email@email.com
+            {{authorEmail}}
         </div>
         <div class="imageDivProfileSmall">
         <img src="../../assets/profile_picture.jpg" alt class class="img-background" style="object-fit: cover;">
@@ -25,7 +27,7 @@
       <div class="bottomContainer">
 
           <h3>This is the new post box</h3>
-          <p>This is my awesome description of the problem. Right now there are no problems because the website is not done yet</p>
+          <p>{{text}}</p>
 
       </div>
       
@@ -37,7 +39,7 @@
 import "bulma/css/bulma.css";
 export default {
   name: "Post",
-  props:["authorEmail"],
+  props:["authorEmail", "text", "title", "likes", "authorName", "location", "imageReference"],
   data() {
     return {};
   },
@@ -45,7 +47,13 @@ export default {
     
     messageUser(){
       this.$router.push({ name: "Messenger", params: { recipient: this.authorEmail } });
+    },
+    getImageFromFirebase(){
+      console.log("ImageReference: "+ this.imageReference)
     }
+  },
+  created() {
+    this.getImageFromFirebase()
   },
 };
 </script>
@@ -60,6 +68,24 @@ export default {
   display: flex;
   margin-left: 1rem; 
   flex: 1;
+}
+
+figure img {
+	-webkit-transform: scale(1.2);
+	transform: scale(1.2);
+	-webkit-transition: .3s ease-in-out;
+	transition: .3s ease-in-out;
+}
+
+figure:hover img {
+	-webkit-transform: scale(1.5);
+	transform: scale(1.5);
+  
+}
+
+figure:hover+span {
+	bottom: 0px;
+	opacity: 1;
 }
 .img-background{
   height: 100%;

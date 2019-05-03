@@ -121,6 +121,7 @@ export default {
           "timestamp": Date.now(),
           "imageReference": imageReference
         }
+        this.chosenFile = null
         this.description = null
         // make the post request
         // This is how you do it:
