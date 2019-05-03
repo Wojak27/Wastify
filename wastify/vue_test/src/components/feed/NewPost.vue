@@ -1,6 +1,7 @@
 <template>
   <div style="padding-bottom:2rem">
     <div class="box new-post is-rounded">
+      <img v-if="chosenFile" id="blah" src="#" alt="your image">
       <div class="control">
         <input class="input is-primary" type="text" placeholder="Title">
       </div>
@@ -28,8 +29,30 @@
             </div>
           </div>
         </div>
-        <i class="fas fa-images btn-image" />
-        <i class="fas fa-location-arrow btn-image"/>
+        
+        <div class="file">
+          <label class="file-label">
+            <input class="file-input" type="file" name="resume" value="upload" @change="gotAnImage">
+            <span class="file-cta">
+              <span class="file-icon">
+                <i class="fas fa-images"></i>
+              </span>
+              <span class="file-label">
+                Pick an image
+              </span>
+            </span>
+          </label>
+        </div>
+
+          <a class="button is-link" title="Disabled button" >
+          <span class="icon">
+            <i class="fas fa-location-arrow btn-image"/>
+          </span>
+          <span>Set the location</span>
+          
+          </a>
+        
+        
         </div>
 
         <a @click="createPost" class="button is-primary is-inverted is-outlined submit">Submit Post</a>
@@ -43,7 +66,6 @@
         </div>
       
     </div>      
-  </div>
 </template>
 
 <script>
@@ -61,7 +83,9 @@ export default {
       feedback: null,
       eventType: null,
       location: null,
-      imageSrc: null
+      imageSrc: null,
+      chosenFile: null,
+      fileName: "https://images.pexels.com/photos/248797/pexels-photo-248797.jpeg?auto=compress&cs=tinysrgb&dpr=1&w=500",
 
     }
   },
@@ -72,23 +96,30 @@ export default {
     createPost(){
       if(this.description){
         console.log("New Post1!")
-
-        // 'http://localhost:5001/product'
         console.log(firebase.auth().currentUser.email)
 
         const Url = 'http://localhost:5001/post'
         // specify the object to post
 
+        //randomize some input
         var min=0; 
         var max=50;  
         var randomLat = Math.random() * (+max - +min) + +min;
-        var randomLng = Math.random() * (+max - +min) + +min;  
+        var randomLng = Math.random() * (+max - +min) + +min; 
+        var imageReference
+        if(this.chosenFile){
+          imageReference = Math.random().toString(36).substring(2, 15) + Math.random().toString(36).substring(2, 15)
+          this.uploadImageToFireStorage(imageReference)
+        } else{
+          imageReference = ""
+        }
         const post = {
           "description": this.description,
           "authorEmail": firebase.auth().currentUser.email,
           "lat": randomLat,
           "lng":randomLng,
-          "timestamp": Date.now()
+          "timestamp": Date.now(),
+          "imageReference": imageReference
         }
         this.description = null
         // make the post request
@@ -109,8 +140,29 @@ export default {
         this.feedback = "You need to fill in all of the fields"
       }
       
+    },
+    gotAnImage(event){
+      console.log("Got an image! "+event.target.files[0])
+      this.chosenFile = event.target.files[0]
+      var reader = new FileReader();
+      
+      reader.onload = function(e) {
+        console.log("on load")
+        $('#blah').attr('src', e.target.result);
+        document.getElementById('blah').src=e.target.result
+      }
+      
+      reader.readAsDataURL(event.target.files[0]);
+      
+    },
+    uploadImageToFireStorage(firebaseReference){
+      console.log(firebaseReference)
+      
+      var storageRef = firebase.storage().ref('eventHeaderImages/'+firebaseReference)
+      storageRef.put(this.chosenFile)
     }
-  }
+  },
+  
 }
 </script>
 

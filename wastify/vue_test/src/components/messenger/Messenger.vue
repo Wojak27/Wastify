@@ -110,10 +110,11 @@ export default {
 
 <style>
 .center-messages-div{
-  height: 40rem;
+  height:97vh;
   display: flex;
   align-self: center;
-
+  background-color: blue;
+  width: 100%;
 }
 
 .friend-body{
@@ -145,7 +146,7 @@ export default {
   height:auto;
 }
 .new-message{
-  width: 45rem;
+  display: flex;
 }
 
 @media screen and (max-width: 600px) {
@@ -158,10 +159,9 @@ export default {
   display: flex;
   flex-direction: column;
   align-items: center;
-  justify-content: center;
-  height: 40rem;
+  justify-content: flex-end;
   overflow: auto;
-  flex: 3;
+  flex: 6;
 }
 
 
@@ -185,7 +185,7 @@ export default {
 
 .message-body{
   display: flex;
-  width: 45rem;
+  width: 100%;
   justify-content: space-between;
   border-top: #000;
 }

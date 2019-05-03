@@ -5,6 +5,7 @@ from flask_cors import CORS
 from flask_sqlalchemy import SQLAlchemy
 from sqlalchemy import desc
 from flask_marshmallow import Marshmallow
+from flask_wtf.file import FileField, FileAllowed
 import os
 
 # Init app
@@ -42,27 +43,31 @@ class Post(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     #name = db.Column(db.String(100), unique=True)
     authorEmail = db.Column(db.String(200), db.ForeignKey('user.firebase_id'), nullable=False)
-    description = db.Column(db.Text)
+    description = db.Column(db.Text, nullable= False)
     #Location of the post/poster, every post has purpouse...
-    lat = db.Column(db.Integer)
-    lng = db.Column(db.Integer)
-    timestamp = db.Column(db.Integer)
-    timeOfTheEvent = db.Column(db.String(200))
+    lat = db.Column(db.Integer, nullable= True)
+    lng = db.Column(db.Integer, nullable= True)
+    timestamp = db.Column(db.Integer, nullable= False)
+    timeOfTheEvent = db.Column(db.String(200), nullable= True)
+    imageReference = db.Column(db.String(200), nullable= True)
     # add date, time, location, imgSrc and name 
 
     # removed the lat and lng from here, have got to remove it from the 
     # backend as well
-    def __init__(self,description, authorEmail, lat, lng, timestamp):
+    def __init__(self,description, authorEmail, lat, lng, timestamp, imageReference=None):
         self.description = description
         self.authorEmail = authorEmail
         self.lat = lat
         self.lng = lng
         self.timestamp = timestamp
+        self.imageReference = imageReference
+        
+
     
 # post Schema
 class PostSchema(ma.Schema):
      class Meta:
-         fields = ('id', 'description', 'authorEmail', 'lat', 'lng', 'timestamp')
+         fields = ('id', 'description', 'authorEmail', 'lat', 'lng', 'timestamp', 'imageReference')
 
 
 # User Class/Model
@@ -107,6 +112,8 @@ def add_post():
     lat = request.json['lat']
     lng = request.json['lng']
     timestamp = request.json['timestamp']
+    imageReference = request.json['imageReference']
+
     new_post = Post(description, authorEmail, lat, lng, timestamp)
 
     db.session.add(new_post)
@@ -117,14 +124,11 @@ def add_post():
 # Get all posts
 @app.route('/latest_posts', methods=['GET'])
 def get_posts():
-    all_posts = Post.query.order_by(desc(Post.timestamp)).all()
+    all_posts = Post.query.order_by(desc(Post.timestamp)).limit(20).all()
     result = posts_schema.dump(all_posts)
     return jsonify(result.data)
 
-# Get a page from the feed 
-@app.route(/page/<nr>, methods=['GET'])
-def getPage(nr):
-    print("Hello")
+
 
 #Get one post
 @app.route('/post/<id>', methods=['GET'])
@@ -140,7 +144,8 @@ def getDataFromJson():
     lat = request.json['lat']
     lng = request.json['lng']
     timestamp = request.json['timestamp']
-    return [description, authorEmail, lat, lng, timestamp]
+    imageReference = request.json['imageReference']
+    return [description, authorEmail, lat, lng, timestamp, imageReference]
 
 # Update a post
 @app.route('/post/<id>', methods=['PUT'])
@@ -152,11 +157,13 @@ def update_post(id):
     lat = request.json['lat']
     lng = request.json['lng']
     timestamp = request.json['timestamp']
+    imageReference = request.json['imageReference']
     post.description = description
     post.authorEmail = authorEmail
     post.lat = lat
     post.lng = lng
     post.timestamp = timestamp
+    post.imageReference = imageReference
 
     db.session.commit()
 
@@ -187,7 +194,7 @@ def add_User():
     username = request.json['username']
     emailAddress = request.json['emailAddress']
     creation_time = request.json['creation_time']
-
+    
     new_User = User(firebase_id, username, emailAddress, creation_time)
 
     db.session.add(new_User)

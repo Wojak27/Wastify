@@ -7,7 +7,7 @@
           <div class="top-left-div">
             <p class="is-size-6 has-text-white">{{ authorEmail }}</p>  
           </div>
-          <div class="imageDivProfileBig">
+          <div class="imageDivProfileBig" @click="changePhoto">
             <img src="../../assets/profile_picture.jpg" alt class="img-background" style="object-fit: cover;">
           </div>
           <div class="top-right-div">
@@ -89,6 +89,9 @@ export default {
       }else if(this.edit_button_title == "Done"){
         this.edit_button_title == "Edit"
       }
+    },
+    changePhoto(){
+      console.log("change Photo")
     }
   },
   created() {
@@ -102,7 +105,7 @@ export default {
 }
 </script>
 
-<style>
+<style scoped>
 .hello {
   padding-top: 5rem;
   padding-bottom: 2rem;
@@ -157,6 +160,12 @@ export default {
   background-color: red;
   position: relative;
   bottom: 4rem;
+}
+
+.imageDivProfileBig img:hover{
+  border-color: yellow;
+  border-width: 4px;
+  cursor: pointer;
 }
 .imageDivProfile{
   height: 250px;

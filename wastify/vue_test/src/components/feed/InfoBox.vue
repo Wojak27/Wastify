@@ -2,11 +2,11 @@
   <div>
     <article class="message is-primary" v-if="isOn">
       <div class="message-header">
-        Info
+        Welcome to Wastify!
         <button class="delete" @click="hideInfo"></button>
       </div>
       <div class="message-body">
-        Lorem ipsum dolor sit amet, consectetur adipiscing elit. Pellentesque risus mi, tempus quis placerat ut, porta nec nulla. Vestibulum rhoncus ac ex sit amet fringilla. Nullam gravida purus diam, et dictum felis venenatis efficitur. Aenean ac eleifend lacus, in mollis lectus. Donec sodales, arcu et sollicitudin porttitor, tortor urna tempor ligula, id porttitor mi magna a neque. Donec dui urna, vehicula et sem eget, facilisis sodales sem.
+        This is a landing page of <strong>Wastify</strong>, a platform , where you with your friends can explore a differend opportunities of helping the world become a better place! You can set your profile picture and bio information in "My Profile". <strong>Explore</strong> new horizonts with the Explore page, where you can se the latests posts near you. You can also message people in this service, by choosing "Messenger" in the menu. <br/> We hope you will enjoy Wastify!
       </div>
     </article>
   </div>

@@ -1,5 +1,5 @@
 <template>
-  <div class="box is-paddingless is-rounded" style="overflow:hidden">
+  <div class="box is-paddingless" style="overflow:hidden; max-width:31rem;">
       <div class="img-container is-paddingless">
         <img src="../../assets/trash.jpg" class="img-background" alt style="object-fit: cover">
       </div>
@@ -68,7 +68,6 @@ export default {
   
 }
 .img-container{
-  max-height: 12rem;
   overflow: hidden;
   flex: 1;
   

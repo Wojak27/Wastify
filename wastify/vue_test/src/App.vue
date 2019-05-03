@@ -2,7 +2,7 @@
   <div id="app">
     <Navbar/>
     <router-view/>
-    <Footer/>
+    <!---<Footer v-if="isFooterOn"/>-->
   </div>
 </template>
 
@@ -12,6 +12,11 @@ import Footer from "@/components/Footer";
 
 export default {
   name: "App",
+  data(){
+    return{
+      isFooterOn: true,
+    }
+  },
   components: {
     Navbar,
     Footer

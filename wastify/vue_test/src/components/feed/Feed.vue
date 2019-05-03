@@ -1,18 +1,23 @@
 <template>
+
   <div class="hello">
+    <a class="button is-primary" title="Disabled button" disabled style="position:fixed; ">Disabled</a>
     <div class="content">
       <div class="center-div">
         <div class="top-container">
+
           <InfoBox class="animated bounceInDown" />
-          <NewPost :method="getPosts" style="position:fixed; width:45rem; zIndex:1" class="animated bounceInDown"/>
+          <NewPost :method="getPosts" style=" width:45rem; zIndex:1" class="animated bounceInDown"/>
         </div>
-        <div class="bottom-container">
+        <div class="bottom-container" style="background-color:red">
           
           <div class="feed-post-container">
             <div class="loading-container">
               <p class="is-size-7 has-text-grey" v-if="loading" >Loading new posts...</p>
             </div>
             <div v-for="post in posts" :key="post.id">
+            
+            <BigPostBox v-if="post.imageReference != ''" />
             <PostBox :text="post.description"  :authorEmail="post.authorEmail" :timestamp="post.timestamp" style="width:31rem;" class="animated swing"/>
           </div>
           
@@ -84,18 +89,20 @@ export default {
           }else{
             timestamp = moment(element.timestamp).format('MMMM Do YYYY, h:mm:ss a')
           }
+
           this.posts.push({
             id: element.id,
             description: element.description,
             authorEmail: element.authorEmail,
-            timestamp: timestamp
+            timestamp: timestamp,
+            imageReference: element.imageReference
           })
           console.log(element)
         });
         this.loading = false
       })
       .catch(error => console.log(error))
-      }
+      },
   },
   created() {
     this.getPosts()
@@ -141,9 +148,7 @@ export default {
 
 .bottom-container{
   display: flex;
-  align-self: flex-end;
   flex-direction: row;
-  margin-top: 13rem;
 }
 .feed-post-container{
   display: flex;
