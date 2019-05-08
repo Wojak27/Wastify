@@ -77,8 +77,6 @@ export default {
     placePostsOnMap(map){
       axios.get('http://localhost:5001/latest_posts')
       .then(response => {
-        console.log(response.data)
-        console.log(response.data[0])
         response.data.forEach(element => {
             console.log("Placing markers")
             console.log(element)

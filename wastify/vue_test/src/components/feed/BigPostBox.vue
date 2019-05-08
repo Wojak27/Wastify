@@ -2,8 +2,8 @@
   <div class="box is-paddingless" style="overflow:hidden; max-width:31rem; margin-bottom: 2rem;">
     
       <div class="img-container is-paddingless">
-        <figure><img src="../../assets/trash.jpg" class="img-background" alt style="object-fit: cover"></figure>
-        <span>Hover</span>
+        <figure><img src="../../assets/trash.jpg" class="img-background" id="postImageContainer" alt style="object-fit: cover"></figure>
+
       </div>
       <div class="header-container">
         <div class="left-div">
@@ -26,7 +26,7 @@
 
       <div class="bottomContainer">
 
-          <h3>This is the new post box</h3>
+          <h3 v-if="title">{{title}}</h3>
           <p>{{text}}</p>
 
       </div>
@@ -37,6 +37,7 @@
 
 <script>
 import "bulma/css/bulma.css";
+import firebase from "firebase";
 export default {
   name: "Post",
   props:["authorEmail", "text", "title", "likes", "authorName", "location", "imageReference"],
@@ -50,10 +51,33 @@ export default {
     },
     getImageFromFirebase(){
       console.log("ImageReference: "+ this.imageReference)
+
+      var storageRef = firebase.storage().ref()
+      //download the image from firebase
+      storageRef.child('gs://geo-location-web-app.appspot.com/eventHeaderImages/yv1b51leyclvddqp95qjz8').getDownloadURL().then(function(url) {
+      // `url` is the download URL for 'images/stars.jpg'
+      console.log("Getting child")
+      // This can be downloaded directly:
+      var xhr = new XMLHttpRequest();
+      xhr.responseType = 'blob';
+      xhr.onload = function(event) {
+        var blob = xhr.response;
+      };
+      xhr.open('GET', url);
+      xhr.send();
+      console.log("Source url: "+url)
+      document.getElementById('postImageContainer').src=url
+    }).catch(function(error) {
+      // Handle any errors
+      console.log("Error downloading an image from the firestore")
+      console.log(error)
+    });
+
+      
     }
   },
   created() {
-    this.getImageFromFirebase()
+    //this.getImageFromFirebase()
   },
 };
 </script>

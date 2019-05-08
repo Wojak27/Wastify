@@ -9,9 +9,10 @@
       <div class="content">
         <p>
           <a class="button is-white" @click="goToUserProfile"><strong>{{authorEmail}}</strong></a>
-          <small>@johnsmith</small> 
           <br/>
           <small>{{timestamp}}</small>
+          <br>
+          <strong v-if="title">{{title}}</strong>
           <br>
           
           {{text}}
@@ -41,7 +42,7 @@ import "bulma/css/bulma.css";
 
 export default {
   name: "PostBox",
-  props: ['text', 'authorEmail', 'timestamp', ],
+  props: ['text', 'authorEmail', 'timestamp', 'title'],
   data(){
     return{
 
@@ -85,5 +86,12 @@ export default {
   overflow: hidden;
 
   position: relative;
+}
+
+.imageDiv img {
+  width: 200px;
+  height: 110px;
+  margin: 0px 0 0 0px;
+  border-width: 5px;
 }
 </style>

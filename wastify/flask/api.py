@@ -43,6 +43,7 @@ class Post(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     #name = db.Column(db.String(100), unique=True)
     authorEmail = db.Column(db.String(200), db.ForeignKey('user.firebase_id'), nullable=False)
+    title = db.Column(db.String(200), nullable=True)
     description = db.Column(db.Text, nullable= False)
     #Location of the post/poster, every post has purpouse...
     lat = db.Column(db.Integer, nullable= True)
@@ -54,7 +55,8 @@ class Post(db.Model):
 
     # removed the lat and lng from here, have got to remove it from the 
     # backend as well
-    def __init__(self,description, authorEmail, lat, lng, timestamp, imageReference=None):
+    def __init__(self,description, authorEmail, lat, lng, timestamp, imageReference=None, title=None):
+        self.title = title
         self.description = description
         self.authorEmail = authorEmail
         self.lat = lat
@@ -67,7 +69,7 @@ class Post(db.Model):
 # post Schema
 class PostSchema(ma.Schema):
      class Meta:
-         fields = ('id', 'description', 'authorEmail', 'lat', 'lng', 'timestamp', 'imageReference')
+         fields = ('id', 'description', 'authorEmail', 'lat', 'lng', 'timestamp', 'imageReference', 'title')
 
 
 # User Class/Model
@@ -107,6 +109,7 @@ class UserSchema(ma.Schema):
 @app.route('/post', methods=['POST'])
 def add_post():
     print("Adding a new post")
+    title = request.json['title']
     description = request.json['description']
     authorEmail = request.json['authorEmail']
     lat = request.json['lat']
@@ -114,7 +117,7 @@ def add_post():
     timestamp = request.json['timestamp']
     imageReference = request.json['imageReference']
 
-    new_post = Post(description, authorEmail, lat, lng, timestamp, imageReference)
+    new_post = Post(description, authorEmail, lat, lng, timestamp, imageReference, title)
 
     db.session.add(new_post)
     db.session.commit()
@@ -139,25 +142,28 @@ def get_post(id):
 
 # get data from JSON
 def getDataFromJson():
+    title = request.json['title']
     description = request.json['description']
     authorEmail = request.json['authorEmail']
     lat = request.json['lat']
     lng = request.json['lng']
     timestamp = request.json['timestamp']
     imageReference = request.json['imageReference']
-    return [description, authorEmail, lat, lng, timestamp, imageReference]
+    return [description, authorEmail, lat, lng, timestamp, imageReference, title]
 
 # Update a post
 @app.route('/post/<id>', methods=['PUT'])
 def update_post(id):
     post = Post.query.get(id)
     
+    title = request.json['title']
     description = request.json['description']
     authorEmail = request.json['authorEmail']
     lat = request.json['lat']
     lng = request.json['lng']
     timestamp = request.json['timestamp']
     imageReference = request.json['imageReference']
+    post.title = title
     post.description = description
     post.authorEmail = authorEmail
     post.lat = lat

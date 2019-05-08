@@ -136,4 +136,9 @@ ul.left {
   max-width: 60rem;
 }
 
+.item-on-navbar{
+  margin-top: 1rem;
+  margin-right: 1rem;
+}
+
 </style>

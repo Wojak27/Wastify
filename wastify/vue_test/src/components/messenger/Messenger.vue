@@ -51,7 +51,7 @@ export default {
     return {
       messages: [],
       author: firebase.auth().currentUser.email,
-      recipients: ["Antek Szadaj","Tabea Schrot","Lenny Johansson","Daniel Wassing"]
+      recipients: ["Antek Szadaj","Lenny Johansson","Daniel Wassing"]
     };
   },
   props: ["recipient"],

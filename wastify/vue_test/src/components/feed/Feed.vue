@@ -16,8 +16,8 @@
             </div>
             <div v-for="post in posts" :key="post.id">
             
-            <BigPostBox v-if="post.imageReference != ''" :text="post.description" :authorEmail="post.authorEmail" :timestamp="post.timestamp" :imageReference="post.imageReference"/>
-            <PostBox :text="post.description"  v-if="post.imageReference == ''" :authorEmail="post.authorEmail" :timestamp="post.timestamp" style="width:31rem;" class="animated swing"/>
+            <BigPostBox v-if="post.imageReference != ''" :text="post.description" :authorEmail="post.authorEmail" :timestamp="post.timestamp" :title="post.title" :imageReference="post.imageReference"/>
+            <PostBox :text="post.description"  v-if="post.imageReference == ''" :authorEmail="post.authorEmail" :timestamp="post.timestamp" :title="post.title" style="width:31rem;" class="animated swing"/>
           </div>
           
           </div>
@@ -89,7 +89,8 @@ export default {
             description: element.description,
             authorEmail: element.authorEmail,
             timestamp: timestamp,
-            imageReference: element.imageReference
+            imageReference: element.imageReference,
+            title: element.title
           })
           console.log(element)
         });

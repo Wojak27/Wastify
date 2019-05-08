@@ -1,9 +1,10 @@
 <template>
   <div style="padding-bottom:2rem">
     <div class="box new-post is-rounded">
-      <img v-if="chosenFile" id="blah" src="#" alt="your image">
+      <a class="delete is-large" style="position:absolute; z-index:1;" v-if="chosenFile" @click="deleteImage"></a>
+      <img v-if="chosenFile" id="blah" src="#" alt="your image"> 
       <div class="control">
-        <input class="input is-primary" type="text" placeholder="Title">
+        <input class="input is-primary" type="text" placeholder="Title" v-model="title">
       </div>
       <textarea class="textarea post-text-field" v-model="description" placeholder="What do you want to do?"></textarea>
       
@@ -79,6 +80,7 @@ export default {
   },
   data(){
     return{
+      title: null,
       description: null,
       feedback: null,
       eventType: null,
@@ -92,6 +94,9 @@ export default {
   methods:{
     selectEventType(typeNumber){
 
+    },
+    deleteImage(){
+      this.chosenFile = null
     },
     createPost(){
       if(this.description){
@@ -114,6 +119,7 @@ export default {
           imageReference = ""
         }
         const post = {
+          "title": this.title,
           "description": this.description,
           "authorEmail": firebase.auth().currentUser.email,
           "lat": randomLat,
@@ -121,6 +127,7 @@ export default {
           "timestamp": Date.now(),
           "imageReference": imageReference
         }
+        this.title = null
         this.chosenFile = null
         this.description = null
         // make the post request
