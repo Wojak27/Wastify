@@ -2,7 +2,7 @@
   <div class="box is-paddingless" style="overflow:hidden; max-width:31rem; margin-bottom: 2rem;">
     
       <div class="img-container is-paddingless">
-        <figure><img src="../../assets/trash.jpg" class="img-background" id="postImageContainer" alt style="object-fit: cover"></figure>
+        <figure><img :src="url" class="img-background" id="postImageContainer" alt style="object-fit: cover"></figure>
 
       </div>
       <div class="header-container">
@@ -14,12 +14,14 @@
         <img src="../../assets/profile_picture.jpg" alt class class="img-background" style="object-fit: cover;">
       </div>
       <div class="right-div">
-          <i class="fas fa-location-arrow"></i>
-          <i class="fas fa-leaf"></i>
-          <a href="#" @click="messageUser">
-            <i class="fas fa-reply" aria-hidden="true" ></i>
-          </a>
           
+          <a href="#" @click="messageUser" class="button is-info is-fullwidth">
+            <i class="fas fa-reply" aria-hidden="true" style="margin-right:10px"></i>
+            Chat
+          </a>
+          <a class="button is-primary is-fullwidth">
+            <i class="fas fa-leaf" style="margin-right:10px"></i> Follow event
+          </a>
         </div>
       </div>
       
@@ -42,7 +44,9 @@ export default {
   name: "Post",
   props:["authorEmail", "text", "title", "likes", "authorName", "location", "imageReference"],
   data() {
-    return {};
+    return {
+      url: "../../assets/trash.jpg"
+    };
   },
   methods: {
     
@@ -52,32 +56,15 @@ export default {
     getImageFromFirebase(){
       console.log("ImageReference: "+ this.imageReference)
 
-      var storageRef = firebase.storage().ref()
-      //download the image from firebase
-      storageRef.child('gs://geo-location-web-app.appspot.com/eventHeaderImages/yv1b51leyclvddqp95qjz8').getDownloadURL().then(function(url) {
-      // `url` is the download URL for 'images/stars.jpg'
-      console.log("Getting child")
-      // This can be downloaded directly:
-      var xhr = new XMLHttpRequest();
-      xhr.responseType = 'blob';
-      xhr.onload = function(event) {
-        var blob = xhr.response;
-      };
-      xhr.open('GET', url);
-      xhr.send();
-      console.log("Source url: "+url)
-      document.getElementById('postImageContainer').src=url
-    }).catch(function(error) {
-      // Handle any errors
-      console.log("Error downloading an image from the firestore")
-      console.log(error)
-    });
+      this.url = 'https://firebasestorage.googleapis.com/v0/b/geo-location-web-app.appspot.com/o/eventHeaderImages%2F'+this.imageReference+'?alt=media'
+      //document.getElementById('postImageContainer').src=url
+    
 
       
     }
   },
-  created() {
-    //this.getImageFromFirebase()
+  mounted() {
+    this.getImageFromFirebase()
   },
 };
 </script>
@@ -86,6 +73,7 @@ export default {
 .right-div{
   /* background-color:red; */
   flex: 1;
+  flex-direction:column;
 }
 .left-div{
   /* background-color:blue; */
@@ -136,7 +124,6 @@ figure:hover+span {
 }
 .header-container{
   display: flex;
-  height: 4rem;
 
 }
 

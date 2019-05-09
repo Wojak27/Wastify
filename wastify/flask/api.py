@@ -6,11 +6,13 @@ from flask_sqlalchemy import SQLAlchemy
 from sqlalchemy import desc
 from flask_marshmallow import Marshmallow
 from flask_wtf.file import FileField, FileAllowed
+# from flask_socketio import SocketIO, send
 import os
 
 # Init app
 app = Flask(__name__)
 CORS(app)
+# socketio = SocketIO(app)
 
 api = Api(app)
 
@@ -124,14 +126,23 @@ def add_post():
 
     return post_schema.jsonify(new_post)
 
-# Get all posts
-@app.route('/latest_posts', methods=['GET'])
-def get_posts():
-    all_posts = Post.query.order_by(desc(Post.timestamp)).limit(20).all()
+# Get selected posts
+@app.route('/latest_posts/<index>', methods=['GET'])
+def get_selected_posts(index):
+    post_limit = 5
+    # posts_len = len(Post.query.order_by(desc(Post.timestamp)).all())
+    all_posts = Post.query.order_by(desc(Post.timestamp)).all()[(int(index)-post_limit):int(index)]
+    print(type(all_posts))
     result = posts_schema.dump(all_posts)
+    print(type(result.data))
     return jsonify(result.data)
 
-
+# Get all posts
+@app.route('/latest_posts/', methods=['GET'])
+def get_posts():
+    all_posts = Post.query.order_by(desc(Post.timestamp)).all()
+    result = posts_schema.dump(all_posts)
+    return jsonify(result.data)
 
 #Get one post
 @app.route('/post/<id>', methods=['GET'])
@@ -287,9 +298,17 @@ POSTGRES = {
     'port': '5432',
 }
 
+# Socket for the posts
+# Not working
+# @socketio.on('new_post')
+# def handleNewPost(post):
+#     print('Post: '+ post)
+#     send(post, broadcast=True)
+
 
 # Run server
 if __name__ == '__main__':
     app.run(host='0.0.0.0', port=80, debug=True)
+    # socketio.run(app)
 
 db.create_all()

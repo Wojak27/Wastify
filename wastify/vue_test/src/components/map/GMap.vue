@@ -1,13 +1,16 @@
 <template>
   <div class="hello2">
     <div class="box my_map_container animated bounceInUp">
-        <i class="is-large">Add an event</i>
+        <h3 class="is-size-3 has-text-white">Explore events</h3>
       <div class="google-map is-marginless" id="map">
       </div>
-      <span class="button is-info map-buttons is-rounded"><i class="fas fa-map-pin" style="margin-right:5px"></i>   Mark and Create an Event</span>
-      <span class="button is-primary map-buttons is-rounded"><i class="fas fa-location-arrow" style="margin-right:5px"></i>    Create Event With this Position</span>
-      <div class="post-area box" v-if="title">
-        {{title}}
+      <div class="post-area box" v-if="description">
+        
+        <h1 class="is-size-3" v-if="title">{{title}}</h1>
+        <img src="#" id="postImageContainer" v-if="this.imageReference">
+        
+        <p>{{description}}</p>
+        
       </div>
     
     </div>
@@ -20,7 +23,7 @@ import firebase from "firebase";
 import "bulma/css/bulma.css";
 import db from "@/firebase/init";
 import axios from "axios";
-
+import moment from "moment"
 
 export default {
   name: "GMap",
@@ -28,8 +31,12 @@ export default {
     return {
       lat: 53,
       lng: -2,
-      posts:[],
-      title: null
+      title: null,
+      description: null,
+      imageRef: null,
+      eventType: null,
+      authorEmail: null,
+      timestamp: null
     };
   },
   mounted() {
@@ -94,19 +101,66 @@ export default {
               icon: icon,
               map: map,
               title: element.description,
+
               
             });
+            marker.set("id", element.id);
             //add click event to marker
             marker.addListener("click", () => {
               this.title = marker.getTitle()
-              console.log("You clicked on the marker: "+this.title);
-              
+              console.log("You clicked on the marker: "+marker.get("id"));
+              var id = marker.get("id")
+              this.getPost(id)
             });
         });
       })
       .catch(error => console.log(error))
 
 
+    },
+    resetContent(){
+        this.description = null
+        this.authorEmail = null
+        this.timestamp = null
+        this.title = null
+        if(this.imageReference){
+          document.getElementById('postImageContainer').src='#'
+          this.imageReference = null
+        }
+        
+    },
+    getPost(id){
+      axios.get('http://localhost:5001/post/'+id)
+      .then(response => {
+        console.log("Got the post" + id)
+        console.log(response.data.description)
+          this.resetContent()
+          var timestamp
+          if(Date.now() - response.data.timestamp < 3758207){
+            timestamp = "Less than an hour ago"
+          }else{
+            timestamp = moment(response.data.timestamp).format('MMMM Do YYYY, h:mm:ss a')
+          }
+          console.log(response.imageReference)
+          
+          this.description = response.data.description
+          this.authorEmail = response.data.authorEmail
+          this.timestamp = timestamp
+          this.imageReference = response.data.imageReference
+          this.title = response.data.title
+          
+          console.log(response)
+          if(this.imageReference){
+            var url = 'https://firebasestorage.googleapis.com/v0/b/geo-location-web-app.appspot.com/o/eventHeaderImages%2F'+this.imageReference+'?alt=media'
+            this.loadImage(url)
+            
+          }
+          
+      })
+      .catch(error => console.log(error))
+    },
+    loadImage(url){
+      document.getElementById('postImageContainer').src=url
     },
     renderMap() {
       const map = new google.maps.Map(document.getElementById("map"), {
@@ -116,21 +170,6 @@ export default {
         minZoom: 3,
         streetViewControl: false
       });
-
-      // custom marker icon
-      var iconBase = 'https://maps.google.com/mapfiles/kml/shapes/';
-      var icons = {
-        parking: {
-          icon: iconBase + 'parking_lot_maps.png'
-        },
-        library: {
-          icon: iconBase + 'library_maps.png'
-        },
-        info: {
-          icon: iconBase + 'info-i_maps.png'
-        }
-      };
-
 
       db.collection("users")
         .get()

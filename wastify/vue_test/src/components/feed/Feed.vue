@@ -6,19 +6,27 @@
         <div class="top-container">
 
           <InfoBox class="animated bounceInDown" />
-          <NewPost :method="getPosts" style=" width:45rem; zIndex:1" class="animated bounceInDown"/>
+          <div id="newpost_div">
+            <NewPost :method="getPosts" style=" width:45rem; zIndex:1" class="animated bounceInDown"/>
+          </div>
         </div>
         <div class="bottom-container">
           
           <div class="feed-post-container">
-            <div class="loading-container">
-              <p class="is-size-7 has-text-grey" v-if="loading" >Loading new posts...</p>
-            </div>
+            
             <div v-for="post in posts" :key="post.id">
             
-            <BigPostBox v-if="post.imageReference != ''" :text="post.description" :authorEmail="post.authorEmail" :timestamp="post.timestamp" :title="post.title" :imageReference="post.imageReference"/>
+            <BigPostBox v-if="post.imageReference != ''" :text="post.description" :authorEmail="post.authorEmail" :timestamp="post.timestamp" :title="post.title" :imageReference="post.imageReference" :url="post.imageURL"/>
             <PostBox :text="post.description"  v-if="post.imageReference == ''" :authorEmail="post.authorEmail" :timestamp="post.timestamp" :title="post.title" style="width:31rem;" class="animated swing"/>
+            
           </div>
+          <div id="sentinel" v-if="hasMorePosts">
+            <a class="button is-rounded is-loading"></a>
+          </div>
+          <div class="loading-container" v-if="!hasMorePosts">
+              No more posts
+            </div>
+          
           
           </div>
         <ProfileBar  id="profile-bar-css" :userEmail="userEmail" class="animated bounceInDown profile-bar" />
@@ -66,20 +74,24 @@ export default {
       fake_timestamp: "234567654321324",
       userEmail: firebase.auth().currentUser.email,
       loading: false,
+      socket: null,
+      hasMorePosts: true,
+      counter: 1,
     };
   },
   methods: {
     getPosts(){
       this.loading = true
-      axios.get('http://localhost:5001/latest_posts')
+      axios.get('http://localhost:5001/latest_posts/'+this.counter*5)
       .then(response => {
-        console.log(response.data)
+        this.counter +=1
+        console.log("response: " +response.data)
         console.log(response.data[0])
-        this.posts = []
-        response.data.forEach(element => {
+        if(response.data){
+          response.data.forEach(element => {
           var timestamp
           if(Date.now() - element.timestamp < 3758207){
-            timestamp = "Less than an your ago"
+            timestamp = "Less than an hour ago"
           }else{
             timestamp = moment(element.timestamp).format('MMMM Do YYYY, h:mm:ss a')
           }
@@ -90,36 +102,57 @@ export default {
             authorEmail: element.authorEmail,
             timestamp: timestamp,
             imageReference: element.imageReference,
-            title: element.title
+            title: element.title,
+            imageURL: 'https://firebasestorage.googleapis.com/v0/b/geo-location-web-app.appspot.com/o/eventHeaderImages%2F'+element.imageReference+'?alt=media'
           })
           console.log(element)
         });
+        }else{
+          this.hasMorePosts = false
+        }
+        
         this.loading = false
       })
       .catch(error => console.log(error))
-      },
-      getImage(firebase_id){
-
       },
       onScrollMethod(){
         
          
       }
   },
-  created() {
-    this.getPosts()
-    window.onscroll = function (e) {  
-        // called when the window is scrolled.  
-        // this works
-        var lol = (e.pageY >= 230)
-        if(lol){
+  mounted() {
+    // Setting up all of the intersecion observers
+    var sentinel = document.querySelector('#sentinel')
+
+    var intersectionObserver = new IntersectionObserver(entries =>{
+      // if intersection ratio is 0, the sentinel is out of view
+      // and we do not need to do anything
+      if(entries[0].intersectionRatio <= 0){
+        return;
+      }
+      this.getPosts()
+    })
+    intersectionObserver.observe(sentinel)
+
+    //Profile bar follows with
+    
+    var newpostBoxSentinel = document.querySelector('#newpost_div')
+
+    var intersectionObserverNewPostBox = new IntersectionObserver(entries =>{
+      // if intersection ratio is 0, the sentinel is out of view
+      // and we do not need to do anything
+      if(entries[0].intersectionRatio <= 0){
           $('#profile-bar-css').css('position', 'fixed').css('top', '3rem');
-        }else if(!lol){
+        }else{
           $('#profile-bar-css').css('position', 'absolute').css('top', 'auto');
         }
-        
-      }
-    
+      return
+    })
+    intersectionObserverNewPostBox.observe(newpostBoxSentinel)
+  },
+  created() {
+    this.getPosts()
+
   },
 };
 </script>

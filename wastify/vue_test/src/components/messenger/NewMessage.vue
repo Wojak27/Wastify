@@ -17,7 +17,7 @@ export default {
   data() {
     return {
       newMessage: null,
-      feedback: null,
+      feedback: null
       
     };
   },
@@ -52,7 +52,7 @@ export default {
             this.feedback = err.message;
             
           });
-
+        
         // Adding a reference in the recipients table
         db.collection("conversations").doc(this.recipient).collection("users").add({
           id:this.author,
@@ -69,6 +69,7 @@ export default {
         this.feedback = "You must enter a message in order to send one";
       }
     }
-  }
+  },
+  
 };
 </script>

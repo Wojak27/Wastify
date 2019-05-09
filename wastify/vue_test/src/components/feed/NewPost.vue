@@ -13,7 +13,7 @@
           <div class="dropdown is-hoverable">
           <div class="dropdown-trigger">
             <button class="button" aria-haspopup="true" aria-controls="dropdown-menu">
-              <span>Event type</span>
+              <span>{{eventType}}</span>
               <span class="icon is-small">
                 <i class="fas fa-angle-down" aria-hidden="true"></i>
               </span>
@@ -31,7 +31,7 @@
           </div>
         </div>
         
-        <div class="file">
+        <div class="file" v-if="!chosenFile">
           <label class="file-label">
             <input class="file-input" type="file" name="resume" value="upload" @change="gotAnImage">
             <span class="file-cta">
@@ -44,12 +44,19 @@
             </span>
           </label>
         </div>
-
-          <a class="button is-link" title="Disabled button" >
+        
+          <a class="button is-link" title="Disabled button" @click="addCurrentLocationToPost" v-if="!lat">
           <span class="icon">
             <i class="fas fa-location-arrow btn-image"/>
           </span>
-          <span>Set the location</span>
+          <span>Add current location</span>
+          
+          </a>
+          <a class="button is-danger" title="Disabled button" @click="removeLocation" v-if="lat">
+          <span class="icon">
+            <i class="fas fa-location-arrow btn-image"/>
+          </span>
+          <span>Remove location</span>
           
           </a>
         
@@ -84,23 +91,51 @@ export default {
       description: null,
       feedback: null,
       eventType: null,
-      location: null,
+      lat: null,
+      lng: null,
       imageSrc: null,
       chosenFile: null,
-      fileName: "https://images.pexels.com/photos/248797/pexels-photo-248797.jpeg?auto=compress&cs=tinysrgb&dpr=1&w=500",
+      eventType: "Event type",
+      fileName: "https://images.pexels.com/photos/248797/pexels-photo-248797.jpeg?auto=compress&cs=tinysrgb&dpr=1&w=500"
+
 
     }
   },
   methods:{
     selectEventType(typeNumber){
-
+      if(typeNumber == 0){
+        console.log("Trash pickup")
+        this.eventType = "Trash pickup"
+      }else if(typeNumber == 1){
+        console.log("Sale")
+        this.eventType = "Sale"
+      }
+    },
+    removeLocation(){
+      this.lat = null
+      this.lng = null
+    },
+    addCurrentLocationToPost(){
+      if (navigator.geolocation) {
+      navigator.geolocation.getCurrentPosition(
+        pos => {
+          this.lat = pos.coords.latitude;
+          this.lng = pos.coords.longitude;
+          
+        },
+        err => {
+          console.log("Getting position error")
+          console.log(err.message);
+        },
+        { maximumAge: 60000, timeout: 10000 }
+      );
+    }
     },
     deleteImage(){
       this.chosenFile = null
     },
     createPost(){
       if(this.description){
-        console.log("New Post1!")
         console.log(firebase.auth().currentUser.email)
 
         const Url = 'http://localhost:5001/post'
@@ -122,8 +157,8 @@ export default {
           "title": this.title,
           "description": this.description,
           "authorEmail": firebase.auth().currentUser.email,
-          "lat": randomLat,
-          "lng":randomLng,
+          "lat": this.lat,
+          "lng":this.lng,
           "timestamp": Date.now(),
           "imageReference": imageReference
         }
@@ -135,8 +170,9 @@ export default {
         axios.post(Url,post)
         .then(response => {
           
-          //console.log(response)
+          console.log("Posting added to the database")
           this.method()
+          
           })
         .catch(error => console.log(error))
 
@@ -169,7 +205,7 @@ export default {
       var storageRef = firebase.storage().ref('eventHeaderImages/'+firebaseReference)
       storageRef.put(this.chosenFile)
     }
-  },
+  }
   
 }
 </script>
