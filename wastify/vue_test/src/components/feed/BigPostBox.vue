@@ -9,6 +9,7 @@
         <div class="left-div">
             Alina Kovalska<br/>
             {{authorEmail}}
+            
         </div>
         <div class="imageDivProfileSmall">
         <img src="../../assets/profile_picture.jpg" alt class class="img-background" style="object-fit: cover;">
@@ -19,8 +20,8 @@
             <i class="fas fa-reply" aria-hidden="true" style="margin-right:10px"></i>
             Chat
           </a>
-          <a class="button is-primary is-fullwidth">
-            <i class="fas fa-leaf" style="margin-right:10px"></i> Follow event
+          <a class="button is-primary is-fullwidth" @click="likePost">
+            <i class="fas fa-leaf" style="margin-right:10px"></i> Eco {{likes}}
           </a>
         </div>
       </div>
@@ -40,16 +41,46 @@
 <script>
 import "bulma/css/bulma.css";
 import firebase from "firebase";
+import axios from "axios";
+
 export default {
   name: "Post",
-  props:["authorEmail", "text", "title", "likes", "authorName", "location", "imageReference"],
+  props:["authorEmail", "text", "title", "authorName", "location", "imageReference", "user_id", "post_id"],
   data() {
     return {
-      url: "../../assets/trash.jpg"
+      url: "../../assets/trash.jpg",
+      likes: null
     };
   },
   methods: {
-    
+    likePost(){
+      console.log("Post liked: "+ this.post_id + " username: "+this.user_id)
+      const Url = 'http://localhost:5001/like_post'
+
+      const like = {
+          "post_id": this.post_id,
+          "user_id": this.user_id
+        }
+      axios.post(Url, like)
+        .then(response => {
+          this.likes = response.data
+          console.log("Like added to the database")
+          
+          })
+        .catch(error => console.log(error))
+    },
+    getLikes(){
+      const Url = 'http://localhost:5001/get_likes/'+this.post_id
+
+      axios.get(Url)
+        .then(response => {
+          
+          console.log("Got likes")
+          console.log(response.data)
+          this.likes = response.data
+          })
+        .catch(error => console.log(error))
+    },
     messageUser(){
       this.$router.push({ name: "Messenger", params: { recipient: this.authorEmail } });
     },
@@ -65,6 +96,7 @@ export default {
   },
   mounted() {
     this.getImageFromFirebase()
+    this.getLikes()
   },
 };
 </script>

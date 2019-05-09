@@ -171,7 +171,7 @@ export default {
         .then(response => {
           
           console.log("Posting added to the database")
-          this.method()
+          //this.method()
           
           })
         .catch(error => console.log(error))

@@ -6,6 +6,7 @@ from flask_sqlalchemy import SQLAlchemy
 from sqlalchemy import desc
 from flask_marshmallow import Marshmallow
 from flask_wtf.file import FileField, FileAllowed
+from sqlalchemy.ext.declarative import declarative_base
 # from flask_socketio import SocketIO, send
 import os
 
@@ -15,6 +16,8 @@ CORS(app)
 # socketio = SocketIO(app)
 
 api = Api(app)
+
+Base = declarative_base()
 
 db = SQLAlchemy()
 basedir = os.path.abspath(os.path.dirname(__file__))
@@ -44,7 +47,7 @@ ma = Marshmallow(app)
 class Post(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     #name = db.Column(db.String(100), unique=True)
-    authorEmail = db.Column(db.String(200), db.ForeignKey('user.firebase_id'), nullable=False)
+    authorEmail = db.Column(db.String(200), db.ForeignKey('user.emailAddress'), nullable=False)
     title = db.Column(db.String(200), nullable=True)
     description = db.Column(db.Text, nullable= False)
     #Location of the post/poster, every post has purpouse...
@@ -65,46 +68,96 @@ class Post(db.Model):
         self.lng = lng
         self.timestamp = timestamp
         self.imageReference = imageReference
-        
 
-    
-# post Schema
-class PostSchema(ma.Schema):
-     class Meta:
-         fields = ('id', 'description', 'authorEmail', 'lat', 'lng', 'timestamp', 'imageReference', 'title')
+# For future possibility to follow people
+# subs = db.Table(
+#     'Subs',
+#     Base.metadata,
+#     db.Column('ParentChildId', db.Integer, primary_key=True),
+#     db.Column('follower_id', db.String(200), db.ForeignKey('User.FirebaseID')),
+#     db.Column('following_id', db.String(200), db.ForeignKey('User.FirebaseID')))
 
+likes = db.Table(
+    'Likes',
+    db.Column('user_id', db.String(200), db.ForeignKey('user.firebase_id')),
+    db.Column('post_id', db.Integer, db.ForeignKey('post.id'))
+)
 
 # User Class/Model
 class User(db.Model):
+
     firebase_id = db.Column(db.String(200), primary_key=True, nullable = False)
     username = db.Column(db.String(200), unique=True, nullable = False)
     emailAddress = db.Column(db.String(200), nullable = False)
-    # Here we can add firends and some extra content data
-    #followers = db.Column(db) # all of the followers
     #following = db.relationship('User', backref='followe', lazy=True)
     description = db.Column(db.Text, nullable=True)
     motto = db.Column(db.Text, nullable = True)
     #likedPosts = db.relationship('Post', backref='hasLiked', lazy=True, nullable = True)
     #creating the relation to the post
-    posts = db.relationship('Post', backref='author', lazy=True)
+    posts = db.relationship('Post', 
+                            backref='author',
+                            lazy='dynamic')
 
     # Creation time of the account
     creation_time = db.Column(db.Integer, nullable = False)
 
-    # add date, time, location, imgSrc and username 
+    liked_posts = db.relationship('Post', secondary=likes, backref=db.backref('user_likes', lazy = 'dynamic'))
+    ### This is just a test for relationships and self referal ###
 
+    # following = db.relationship('User',
+    #                             secondary=subs,
+    #                             primaryjoin=firebase_id == subs.c.follower_id,
+    #                             secondaryjoin=firebase_id == subs.c.following_id,
+    #                              backref=db.backref('followers', lazy = 'dynamic'))
+    
+    
+
+    # add date, time, imgSrc and username 
     def __init__(self,firebase_id, username, emailAddress, creation_time):
         self.firebase_id = firebase_id
         self.username = username
         self.emailAddress = emailAddress
+        self.description = ""
+        self.motto = ""
+        self.posts = []
         self.creation_time = creation_time
+        self.following = []
 
+    ############### For testing ################
+    # def __init__(self,firebase_id, username):
+    #     self.firebase_id = firebase_id
+    #     self.username = username
+    #     self.emailAddress = "emailAddress"
+    #     self.description = ""
+    #     self.motto = ""
+    #     self.posts = []
+    #     self.creation_time = "1"
+    #     self.following = []
+
+# class Comment(db.Model):
+#     comment_id = db.Column(db.Integer, primary_key=True)
+#     comment_text = db.Column(db.Text, nullable= False)
+#     authorEmail = db.Column(db.String(200), db.ForeignKey('user.emailAddress'), nullable=False)
+#     postId = db.Column(db.String(200), db.ForeignKey('post.id'), nullable=False)
+#     timestamp = db.Column(db.Integer, nullable= False)
+
+    
+
+######################### SCHEMAS ##############################
 # User Schema
 class UserSchema(ma.Schema):
      class Meta:
          fields = ('firebase_id', 'username', 'emailAddress', 'creation_time')
 
+# post Schema
+class PostSchema(ma.Schema):
+     class Meta:
+         fields = ('id', 'description', 'authorEmail', 'lat', 'lng', 'timestamp', 'imageReference', 'title')
 
+# Comment Schema
+# class CommentSchema(ma.Schema):
+#      class Meta:
+#          fields = ('comment_text', 'authorEmail', 'timestamp', 'postId')
 ########################## THE API #######################################
 
 # Create a post
@@ -130,9 +183,23 @@ def add_post():
 @app.route('/latest_posts/<index>', methods=['GET'])
 def get_selected_posts(index):
     post_limit = 5
-    # posts_len = len(Post.query.order_by(desc(Post.timestamp)).all())
-    all_posts = Post.query.order_by(desc(Post.timestamp)).all()[(int(index)-post_limit):int(index)]
-    print(type(all_posts))
+    posts = Post.query.order_by(desc(Post.timestamp)).all()
+    posts_count = len(posts)
+    index = int(index)
+    all_posts = []
+    print(posts_count-index+1)
+    if posts_count-(index+1-post_limit)>0 and posts_count-(index+1-post_limit)<5:
+        # We have less than 5 posts left, return the rest
+        print("We have less than 5 posts left, return the rest")
+        all_posts = posts[(index-post_limit):]
+    elif posts_count-(index+1-post_limit)>post_limit:
+        # We have more than 5 posts remaining
+        print("We have more than 5 posts remaining")
+        all_posts = posts[(index-post_limit):index]
+    else:
+        # If the index that we ask for is bigger than the post we have
+        # just return an empty array
+        print("No more posts")
     result = posts_schema.dump(all_posts)
     print(type(result.data))
     return jsonify(result.data)
@@ -150,17 +217,6 @@ def get_post(id):
     post = Post.query.get(id)
     
     return post_schema.jsonify(post)
-
-# get data from JSON
-def getDataFromJson():
-    title = request.json['title']
-    description = request.json['description']
-    authorEmail = request.json['authorEmail']
-    lat = request.json['lat']
-    lng = request.json['lng']
-    timestamp = request.json['timestamp']
-    imageReference = request.json['imageReference']
-    return [description, authorEmail, lat, lng, timestamp, imageReference, title]
 
 # Update a post
 @app.route('/post/<id>', methods=['PUT'])
@@ -186,9 +242,33 @@ def update_post(id):
 
     return post_schema.jsonify(post)
 
+# Like post
+@app.route('/like_post', methods=['POST'])
+def like_post():
+    post_id = request.json['post_id']
+    user_id = request.json['user_id']
+    post = Post.query.get(int(post_id))
+    user = User.query.get(user_id)
+    post.user_likes.append(user)
+
+    db.session.commit()
+    print("Added a like to post id: ", post_id, " and user: ", user_id)
+    return str(len(post.user_likes.all()))
+
+# Get likes 
+@app.route('/get_likes/<post_id>', methods=['GET'])
+def get_likes(post_id):
+    post = Post.query.get(int(post_id))
+    #print("Getting likes... ")
+    print("likes: ")
+    print(type(post.user_likes.all()))
+    #result = post_schema.dump(post)
+    #print(result)
+    return str(len(post.user_likes.all()))
+
 # Delete post
 @app.route('/post/<id>', methods=['DELETE'])
-def delete_post(firebase_id):
+def delete_post(id):
     post = Post.query.get(id)
     db.session.delete(post)
 
@@ -275,7 +355,32 @@ user_schema = UserSchema(strict=True)
 users_schema = UserSchema(many=True, strict=True)
 
 
+# Create a comment
+# @app.route('/comment/', methods=['POST'])
+# def add_comment():
+#     print("Adding a new comment")
+#     comment_text = request.json['comment_text']
+#     authorEmail = request.json['authorEmail']
+#     timestamp = request.json['timestamp']
+#     postId = request.json['postId']
+    
 
+#     new_comment = Comment(comment_text, authorEmail, timestamp, postId)
+
+#     db.session.add(new_comment)
+#     db.session.commit()
+
+#     return post_schema.jsonify(new_comment)
+
+# Get all comments
+# @app.route('/get_comments/<postId>', methods=['GET'])
+# def get_comments(postId):
+#     all_comments = Comment.query.order_by(desc(Comment.timestamp)).all()
+#     result = posts_schema.dump(all_comments)
+#     return jsonify(result.data)
+
+# comment_schema = CommentSchema(strict=True)
+# comment_schema = CommentSchema(many=True, strict=True)
 
 # Some reference code
 #I just want to be able to manipulate the parameters

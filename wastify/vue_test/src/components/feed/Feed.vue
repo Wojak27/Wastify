@@ -5,9 +5,9 @@
       <div class="center-div">
         <div class="top-container">
 
-          <InfoBox class="animated bounceInDown" />
+          <InfoBox class="animated" />
           <div id="newpost_div">
-            <NewPost :method="getPosts" style=" width:45rem; zIndex:1" class="animated bounceInDown"/>
+            <NewPost :method="getPosts" style=" width:45rem; zIndex:1" class="animated"/>
           </div>
         </div>
         <div class="bottom-container">
@@ -16,8 +16,9 @@
             
             <div v-for="post in posts" :key="post.id">
             
-            <BigPostBox v-if="post.imageReference != ''" :text="post.description" :authorEmail="post.authorEmail" :timestamp="post.timestamp" :title="post.title" :imageReference="post.imageReference" :url="post.imageURL"/>
-            <PostBox :text="post.description"  v-if="post.imageReference == ''" :authorEmail="post.authorEmail" :timestamp="post.timestamp" :title="post.title" style="width:31rem;" class="animated swing"/>
+            <BigPostBox v-if="post.imageReference != ''" :text="post.description" :authorEmail="post.authorEmail" :user_id="user_id" :post_id="post.id" :timestamp="post.timestamp" :title="post.title" :imageReference="post.imageReference" :url="post.imageURL"/>
+            <PostBox style="width:31rem;" class="animated swing" v-if="post.imageReference == ''"
+                      :text="post.description"  :authorEmail="post.authorEmail" :timestamp="post.timestamp" :title="post.title" />
             
           </div>
           <div id="sentinel" v-if="hasMorePosts">
@@ -29,7 +30,7 @@
           
           
           </div>
-        <ProfileBar  id="profile-bar-css" :userEmail="userEmail" class="animated bounceInDown profile-bar" />
+        <ProfileBar  id="profile-bar-css" :userEmail="userEmail" class="animated profile-bar" />
         
         </div>     
              
@@ -77,6 +78,7 @@ export default {
       socket: null,
       hasMorePosts: true,
       counter: 1,
+      user_id: firebase.auth().currentUser.uid
     };
   },
   methods: {
@@ -84,10 +86,11 @@ export default {
       this.loading = true
       axios.get('http://localhost:5001/latest_posts/'+this.counter*5)
       .then(response => {
-        this.counter +=1
+        
         console.log("response: " +response.data)
         console.log(response.data[0])
         if(response.data){
+          this.counter +=1
           response.data.forEach(element => {
           var timestamp
           if(Date.now() - element.timestamp < 3758207){
@@ -139,8 +142,9 @@ export default {
     var newpostBoxSentinel = document.querySelector('#newpost_div')
 
     var intersectionObserverNewPostBox = new IntersectionObserver(entries =>{
-      // if intersection ratio is 0, the sentinel is out of view
-      // and we do not need to do anything
+      // When the new post div is in view,
+      // let the profile bar's position be absolute
+      // and fixed otherwise
       if(entries[0].intersectionRatio <= 0){
           $('#profile-bar-css').css('position', 'fixed').css('top', '3rem');
         }else{
@@ -149,10 +153,11 @@ export default {
       return
     })
     intersectionObserverNewPostBox.observe(newpostBoxSentinel)
+    console.log("UID")
+    console.log(firebase.auth().currentUser.uid)
   },
   created() {
-    this.getPosts()
-
+    
   },
 };
 </script>
