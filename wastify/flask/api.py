@@ -259,11 +259,6 @@ def like_post():
 @app.route('/get_likes/<post_id>', methods=['GET'])
 def get_likes(post_id):
     post = Post.query.get(int(post_id))
-    #print("Getting likes... ")
-    print("likes: ")
-    print(type(post.user_likes.all()))
-    #result = post_schema.dump(post)
-    #print(result)
     return str(len(post.user_likes.all()))
 
 # Delete post
@@ -271,11 +266,24 @@ def get_likes(post_id):
 def delete_post(id):
     post = Post.query.get(id)
     db.session.delete(post)
-
     db.session.commit()
-
     return post_schema.jsonify(post)
 
+# Chechs if user have 
+@app.route('/has_liked', methods=['GET', 'POST', 'PUT'])
+def has_liked():
+    post_id = request.json['post_id']
+    post = Post.query.get(int(post_id))
+    firebase_id = request.json['firebase_id']
+    print("Has liked")
+    for user in post.user_likes.all():
+        if user.firebase_id in firebase_id:
+            return "True"
+    #print(db.session.query(post.user_likes.user_id).filter_by(name=firebase_id).scalar() is not None)
+    #if str(firebase_id) in post.user_likes.all():
+    return "False"
+    #else: 
+    #    return "False"
 
 # Init schema
 post_schema = PostSchema(strict=True)

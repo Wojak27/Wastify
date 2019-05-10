@@ -5,7 +5,7 @@
       <div class="center-div">
         <div class="top-container">
 
-          <InfoBox class="animated" />
+          <!--<InfoBox class="animated" />-->
           <div id="newpost_div">
             <NewPost :method="getPosts" style=" width:45rem; zIndex:1" class="animated"/>
           </div>
@@ -18,7 +18,7 @@
             
             <BigPostBox v-if="post.imageReference != ''" :text="post.description" :authorEmail="post.authorEmail" :user_id="user_id" :post_id="post.id" :timestamp="post.timestamp" :title="post.title" :imageReference="post.imageReference" :url="post.imageURL"/>
             <PostBox style="width:31rem;" class="animated swing" v-if="post.imageReference == ''"
-                      :text="post.description"  :authorEmail="post.authorEmail" :timestamp="post.timestamp" :title="post.title" />
+                      :text="post.description"  :authorEmail="post.authorEmail" :timestamp="post.timestamp" :title="post.title" :user_id="user_id" :post_id="post.id" />
             
           </div>
           <div id="sentinel" v-if="hasMorePosts">

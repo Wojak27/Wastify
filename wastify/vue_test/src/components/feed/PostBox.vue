@@ -20,15 +20,13 @@
       </div>
       <nav class="level is-mobile">
         <div class="level-left">
-          <a class="level-item" aria-label="reply" @click="messageUser">
+          <a class="button is-rounded is-info level-item" aria-label="reply" @click="messageUser">
             <span class="icon is-small">
               <i class="fas fa-reply" aria-hidden="true"></i>
             </span>
           </a>
-          <a class="level-item" aria-label="like">
-            <span class="icon is-small">
-              <i class="fas fa-heart" aria-hidden="true"></i>
-            </span>
+          <a class="button level-item is-rounded" aria-label="like" @click="likePost" :id="this.post_id">
+              <i class="fas fa-leaf" style="margin-right:10px"></i>{{this.likes}}
           </a>
         </div>
       </nav>
@@ -39,25 +37,72 @@
 
 <script>
 import "bulma/css/bulma.css";
-
+import animate from "animate.css"
+import axios from "axios"
 export default {
   name: "PostBox",
-  props: ['text', 'authorEmail', 'timestamp', 'title'],
+  props: ['text', 'authorEmail', 'timestamp', 'title', 'user_id', 'post_id'],
   data(){
     return{
-
+      likes:0
     }
   },
   methods: {
+    likePost(){
+      console.log("Post liked: "+ this.post_id + " username: "+this.user_id)
+      const Url = 'http://localhost:5001/like_post'
+
+      const like = {
+          "post_id": this.post_id,
+          "user_id": this.user_id
+        }
+      axios.post(Url, like)
+        .then(response => {
+          this.likes = response.data
+          console.log("Like added to the database")
+          $('#'+this.post_id).addClass("heartBeat").addClass(" is-success")
+          })
+        .catch(error => console.log(error))
+    },
     goToUserProfile(){
       this.$router.push({ name: "ProfilePage", params: { authorEmail: this.authorEmail } });
     },
     messageUser(){
       this.$router.push({ name: "Messenger", params: { recipient: this.authorEmail } });
-    }
+    },
+    getLikes(){
+      const Url = 'http://localhost:5001/get_likes/'+this.post_id
+
+      axios.get(Url)
+        .then(response => {
+          
+          console.log("Got likes")
+          console.log(response.data)
+          this.likes = response.data
+          })
+        .catch(error => console.log(error))
+    },
+  checkIfLiked(){
+    const Url = 'http://localhost:5001/has_liked'
+
+      const content = {
+        "firebase_id": this.user_id,
+        "post_id": this.post_id,
+      }
+      axios.post(Url, content)
+        .then(response => {
+          console.log("Response data:")
+          console.log(response.data)
+          if(response.data === "True"){
+            $('#'+this.post_id).addClass("is-success")
+          }
+          })
+        .catch(error => console.log(error))
+  }
   },
   created() {
-    console.log(this.authorEmail)
+    this.getLikes()
+    this.checkIfLiked()
   },
 }
 </script>

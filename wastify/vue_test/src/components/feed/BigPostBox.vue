@@ -6,9 +6,9 @@
 
       </div>
       <div class="header-container">
-        <div class="left-div">
-            Alina Kovalska<br/>
-            {{authorEmail}}
+        <div class="left-div"> <h1 class="is-size-6">Karol Wojtulewicz</h1>
+        <p class="is-size-7">{{authorEmail}}</p>
+            
             
         </div>
         <div class="imageDivProfileSmall">
@@ -16,12 +16,12 @@
       </div>
       <div class="right-div">
           
-          <a href="#" @click="messageUser" class="button is-info is-fullwidth">
+          <a href="#" @click="messageUser" class="button is-fullwidth is-info">
             <i class="fas fa-reply" aria-hidden="true" style="margin-right:10px"></i>
             Chat
           </a>
-          <a class="button is-primary is-fullwidth" @click="likePost">
-            <i class="fas fa-leaf" style="margin-right:10px"></i> Eco {{likes}}
+          <a class="button is-fullwidth" @click="likePost">
+            <i class="fas fa-leaf" style="margin-right:10px;"></i> Eco {{likes}}
           </a>
         </div>
       </div>
@@ -49,7 +49,7 @@ export default {
   data() {
     return {
       url: "../../assets/trash.jpg",
-      likes: null
+      likes: 0
     };
   },
   methods: {
@@ -75,7 +75,6 @@ export default {
       axios.get(Url)
         .then(response => {
           
-          console.log("Got likes")
           console.log(response.data)
           this.likes = response.data
           })
@@ -106,13 +105,16 @@ export default {
   /* background-color:red; */
   flex: 1;
   flex-direction:column;
+  padding:1rem;
 }
 .left-div{
   /* background-color:blue; */
   display: flex;
-  margin-left: 1rem; 
+  padding: 1rem; 
+  flex-direction:column;
   flex: 1;
 }
+a { color: #000000; }
 
 figure img {
 	-webkit-transform: scale(1.2);
