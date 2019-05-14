@@ -18,7 +18,7 @@
             
             <BigPostBox v-if="post.imageReference != ''" :text="post.description" :authorEmail="post.authorEmail" :user_id="user_id" :post_id="post.id" :timestamp="post.timestamp" :title="post.title" :imageReference="post.imageReference" :url="post.imageURL"/>
             <PostBox style="width:31rem;" class="animated swing" v-if="post.imageReference == ''"
-                      :text="post.description"  :authorEmail="post.authorEmail" :timestamp="post.timestamp" :title="post.title" :user_id="user_id" :post_id="post.id" />
+                      :text="post.description"  :authorEmail="post.authorEmail" :timestamp="post.timestamp" :title="post.title" :user_id="user_id" :post_id="post.id"/>
             
           </div>
           <div id="sentinel" v-if="hasMorePosts">

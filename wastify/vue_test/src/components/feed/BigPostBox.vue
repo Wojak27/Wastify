@@ -8,7 +8,7 @@
       <div class="header-container">
         <div class="left-div"> <h1 class="is-size-6">Karol Wojtulewicz</h1>
         <p class="is-size-7">{{authorEmail}}</p>
-            
+        <p class="is-size-7">{{timestamp}}</p>
             
         </div>
         <div class="imageDivProfileSmall">
@@ -16,11 +16,11 @@
       </div>
       <div class="right-div">
           
-          <a href="#" @click="messageUser" class="button is-fullwidth is-info">
+          <a href="#" @click="messageUser" class="button is-fullwidth is-info is-rounded">
             <i class="fas fa-reply" aria-hidden="true" style="margin-right:10px"></i>
-            Chat
+            Message
           </a>
-          <a class="button is-fullwidth" @click="likePost">
+          <a class="button is-fullwidth is-rounded" @click="likePost" :id="this.post_id">
             <i class="fas fa-leaf" style="margin-right:10px;"></i> Eco {{likes}}
           </a>
         </div>
@@ -45,7 +45,7 @@ import axios from "axios";
 
 export default {
   name: "Post",
-  props:["authorEmail", "text", "title", "authorName", "location", "imageReference", "user_id", "post_id"],
+  props:["authorEmail", "timestamp", "text", "title", "authorName", "location", "imageReference", "user_id", "post_id"],
   data() {
     return {
       url: "../../assets/trash.jpg",
@@ -65,10 +65,27 @@ export default {
         .then(response => {
           this.likes = response.data
           console.log("Like added to the database")
-          
+          $('#'+this.post_id).addClass("heartBeat").addClass("is-success")
           })
         .catch(error => console.log(error))
     },
+  checkIfLiked(){
+    const Url = 'http://localhost:5001/has_liked'
+
+      const content = {
+        "firebase_id": this.user_id,
+        "post_id": this.post_id,
+      }
+      axios.post(Url, content)
+        .then(response => {
+          console.log("Response data:")
+          console.log(response.data)
+          if(response.data === "True"){
+            $('#'+this.post_id).addClass("is-success")
+          }
+          })
+        .catch(error => console.log(error))
+  },
     getLikes(){
       const Url = 'http://localhost:5001/get_likes/'+this.post_id
 
@@ -96,6 +113,7 @@ export default {
   mounted() {
     this.getImageFromFirebase()
     this.getLikes()
+    this.checkIfLiked()
   },
 };
 </script>
