@@ -16,7 +16,7 @@
       </div>
       <div class="right-div">
           
-          <a href="#" @click="messageUser" class="button is-fullwidth is-info is-rounded">
+          <a href="#" @click="messageUser" class="button is-fullwidth is-info is-rounded" v-if="!this.isSameUser">
             <i class="fas fa-reply" aria-hidden="true" style="margin-right:10px"></i>
             Message
           </a>
@@ -44,12 +44,13 @@ import firebase from "firebase";
 import axios from "axios";
 
 export default {
-  name: "Post",
+  name: "BigPostBox",
   props:["authorEmail", "timestamp", "text", "title", "authorName", "location", "imageReference", "user_id", "post_id"],
   data() {
     return {
       url: "../../assets/trash.jpg",
-      likes: 0
+      likes: 0,
+      isSameUser: false,
     };
   },
   methods: {
@@ -97,6 +98,11 @@ export default {
           })
         .catch(error => console.log(error))
     },
+    checkIfSameUser(){
+      console.log("check if same user " + this.authorEmail + " " + (this.authorEmail == firebase.auth().currentUser.email))
+      this.isSameUser = (this.authorEmail == firebase.auth().currentUser.email)
+
+    },
     messageUser(){
       this.$router.push({ name: "Messenger", params: { recipient: this.authorEmail } });
     },
@@ -114,6 +120,7 @@ export default {
     this.getImageFromFirebase()
     this.getLikes()
     this.checkIfLiked()
+    this.checkIfSameUser()
   },
 };
 </script>

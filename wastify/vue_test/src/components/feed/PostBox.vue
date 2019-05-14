@@ -20,7 +20,7 @@
       </div>
       <nav class="level is-mobile">
         <div class="level-left">
-          <a class="button is-rounded is-info level-item" aria-label="reply" @click="messageUser">
+          <a v-if="!this.isSameUser" class="button is-rounded is-info level-item" aria-label="reply" @click="messageUser">
             <span class="icon is-small">
               <i class="fas fa-reply" aria-hidden="true"></i>
             </span>
@@ -39,12 +39,15 @@
 import "bulma/css/bulma.css";
 import animate from "animate.css"
 import axios from "axios"
+import firebase from 'firebase'
+
 export default {
   name: "PostBox",
   props: ['text', 'authorEmail', 'timestamp', 'title', 'user_id', 'post_id'],
   data(){
     return{
-      likes:0
+      likes:0,
+      isSameUser: false,
     }
   },
   methods: {
@@ -66,6 +69,12 @@ export default {
     },
     goToUserProfile(){
       this.$router.push({ name: "ProfilePage", params: { authorEmail: this.authorEmail } });
+    },
+
+    checkIfSameUser(){
+      console.log("check if same user " + this.authorEmail + " " + (this.authorEmail == firebase.auth().currentUser.email))
+      this.isSameUser = (this.authorEmail == firebase.auth().currentUser.email)
+
     },
     messageUser(){
       this.$router.push({ name: "Messenger", params: { recipient: this.authorEmail } });
@@ -103,6 +112,7 @@ export default {
   created() {
     this.getLikes()
     this.checkIfLiked()
+    this.checkIfSameUser()
   },
 }
 </script>
