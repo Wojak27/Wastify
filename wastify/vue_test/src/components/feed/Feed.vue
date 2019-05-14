@@ -45,7 +45,6 @@ import ProfileBar from "@/components/ProfileBar";
 import Footer from "@/components/Footer";
 import Tiles from "@/components/Tiles";
 import PostBox from "@/components/feed/PostBox";
-import MyPostBox from "@/components/feed/MyPostBox";
 import NewPost from "@/components/feed/NewPost";
 import BigPostBox from "@/components/feed/BigPostBox";
 import InfoBox from "@/components/feed/InfoBox";

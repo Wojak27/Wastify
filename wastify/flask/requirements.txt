@@ -9,3 +9,4 @@ flask-marshmallow
 marshmallow-SQLAlchemy
 flask-wtf
 flask-socketio
+pytest

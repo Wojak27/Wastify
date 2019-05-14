@@ -7,6 +7,7 @@ from sqlalchemy import desc
 from flask_marshmallow import Marshmallow
 from flask_wtf.file import FileField, FileAllowed
 from sqlalchemy.ext.declarative import declarative_base
+import pytest
 # from flask_socketio import SocketIO, send
 import os
 
@@ -60,7 +61,7 @@ class Post(db.Model):
 
     # removed the lat and lng from here, have got to remove it from the 
     # backend as well
-    def __init__(self,description, authorEmail, lat, lng, timestamp, imageReference=None, title=None):
+    def __init__(self,description, authorEmail, lat, lng, timestamp, imageReference=None, title=None, timeOfTheEvent=None):
         self.title = title
         self.description = description
         self.authorEmail = authorEmail
@@ -68,6 +69,7 @@ class Post(db.Model):
         self.lng = lng
         self.timestamp = timestamp
         self.imageReference = imageReference
+        self.timeOfTheEvent = timeOfTheEvent
 
 # For future possibility to follow people
 # subs = db.Table(
@@ -171,8 +173,8 @@ def add_post():
     lng = request.json['lng']
     timestamp = request.json['timestamp']
     imageReference = request.json['imageReference']
-
-    new_post = Post(description, authorEmail, lat, lng, timestamp, imageReference, title)
+    timeOfTheEvent = request.json['timeOfTheEvent']
+    new_post = Post(description, authorEmail, lat, lng, timestamp, imageReference, title, timeOfTheEvent)
 
     db.session.add(new_post)
     db.session.commit()
@@ -390,26 +392,15 @@ users_schema = UserSchema(many=True, strict=True)
 # comment_schema = CommentSchema(strict=True)
 # comment_schema = CommentSchema(many=True, strict=True)
 
-# Some reference code
-#I just want to be able to manipulate the parameters
-@app.route('/login', methods=['GET', 'POST'])
-def login():
-    username = request.args.get('username')
-    password = request.args.get('password')
-    print(username)
-    print(password) 
+# For testing tests
+def testFunction(a):
+    return 1
 
+# Some reference code
 @app.route('/', methods=['GET'])
 def get():
     return jsonify({'msg': 'Hello World'})
 
-POSTGRES = {
-    'user': 'postgres',
-    'pw': 'password',
-    'db': 'my_database',
-    'host': 'localhost',
-    'port': '5432',
-}
 
 # Socket for the posts
 # Not working
