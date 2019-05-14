@@ -56,7 +56,6 @@ export default {
   border-color: #53bc88;
   overflow: hidden;
   position: relative;
-  margin-top: 1rem;
 }
 .imageDivProfile {
   border-radius: 50%;

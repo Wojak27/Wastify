@@ -7,7 +7,7 @@
 
           <!--<InfoBox class="animated" />-->
           <div id="newpost_div">
-            <NewPost :method="getPosts" style=" width:45rem; zIndex:1" class="animated"/>
+            <NewPost :method="getFreshPosts" style=" width:45rem; zIndex:1" class="animated"/>
           </div>
         </div>
         <div class="bottom-container">
@@ -81,6 +81,11 @@ export default {
     };
   },
   methods: {
+    getFreshPosts(){
+      this.counter = 1
+      this.posts = []
+      this.getPosts()
+    },
     getPosts(){
       this.loading = true
       axios.get('http://localhost:5001/latest_posts/'+this.counter*5)
@@ -88,7 +93,7 @@ export default {
         
         console.log("response: " +response.data)
         console.log(response.data[0])
-        if(response.data){
+        if(response.data[0]){
           this.counter +=1
           response.data.forEach(element => {
           var timestamp

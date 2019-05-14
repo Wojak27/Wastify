@@ -4,7 +4,7 @@
       <a class="delete is-large" style="position:absolute; z-index:1;" v-if="hasChoosenFile" @click="deleteImage"></a>
       <img v-if="hasChoosenFile" id="blah" src="#" alt="your image"> 
       <div class="control">
-        <input class="input is-primary" type="text" placeholder="Title" v-model="title">
+        <input v-if="!isPost" class="input is-primary" type="text" placeholder="Title" v-model="title">
       </div>
       <textarea class="textarea post-text-field" v-model="description" placeholder="What do you want to do?"></textarea>
       <div class="control date-time" v-if="!isPost">
@@ -175,7 +175,7 @@ export default {
           "lng":this.lng,
           "timestamp": Date.now(),
           "imageReference": imageReference,
-          "timeOfTheEvent": date
+          "timeOfTheEvent": this.date
         }
         this.title = null
         this.hasChoosenFile = null
@@ -186,7 +186,7 @@ export default {
         .then(response => {
           
           console.log("Posting added to the database")
-          //this.method()
+          this.method()
           
           })
         .catch(error => console.log(error))
