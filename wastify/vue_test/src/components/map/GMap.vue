@@ -7,7 +7,7 @@
       <div class="post-area box" v-if="description">
         
         <h1 class="is-size-3" v-if="title">{{title}}</h1>
-        <img src="#" id="postImageContainer" v-if="this.imageReference">
+        <img :src="imageUrl" id="postImageContainer" v-if="this.imageReference">
         
         <p>{{description}}</p>
         
@@ -36,7 +36,8 @@ export default {
       imageRef: null,
       eventType: null,
       authorEmail: null,
-      timestamp: null
+      timestamp: null,
+      imageUrl: "http://moritzdentalcare.com/wp-content/uploads/2016/10/orionthemes-placeholder-image.png"
     };
   },
   mounted() {
@@ -151,16 +152,12 @@ export default {
           
           console.log(response)
           if(this.imageReference){
-            var url = 'https://firebasestorage.googleapis.com/v0/b/geo-location-web-app.appspot.com/o/eventHeaderImages%2F'+this.imageReference+'?alt=media'
-            this.loadImage(url)
+            this.imageUrl = 'https://firebasestorage.googleapis.com/v0/b/geo-location-web-app.appspot.com/o/eventHeaderImages%2F'+this.imageReference+'?alt=media'
             
           }
           
       })
       .catch(error => console.log(error))
-    },
-    loadImage(url){
-      document.getElementById('postImageContainer').src=url
     },
     renderMap() {
       const map = new google.maps.Map(document.getElementById("map"), {
