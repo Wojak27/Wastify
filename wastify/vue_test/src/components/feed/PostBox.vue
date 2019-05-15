@@ -77,7 +77,7 @@ export default {
 
     },
     messageUser(){
-      this.$router.push({ name: "Messenger", params: { recipient: this.authorEmail } });
+      this.$router.push({ name: "Messenger", params: { recipientEmail: this.authorEmail } });
     },
     getLikes(){
       const Url = 'http://localhost:5001/get_likes/'+this.post_id

@@ -1,90 +1,107 @@
 <template>
   <div class="chat">
-    <div class="center-messages-div">
-      <div class="left-messages-div box">
-        <div v-chat-scroll>
-          <div class="friend-body" v-for="(recipient, index) in recipients" :key="index">
-            
-            <a class="button is-small" style="width:100%">{{recipient}}</a>
+    <div class="body-messages-div">
+      <div class="left-messages-div box is-paddingless">
+        <div>
+          <div class="friend-body" v-for="(friend, index) in friends" :key="index">
+            <a
+              class="button is-small"
+              style="width:100%"
+              @click="loadConversation(friend)"
+            >{{friend}}</a>
           </div>
         </div>
       </div>
-      <div class="card box">
-        <div class="messages" v-chat-scroll>
-          <div v-for="message in messages" :key="message.id" class="message-body">
-            <div class="name">
-              <span class="teal-text">{{ message.author}}</span>
+      <div class="card box center-messages-div">
+        <div class="messages" v-chat-scroll="{smooth: true}" style="overflow:scroll;">
+          <div class="nofrineds" v-if="!hasFriends">You don't have any friends yet!</div>
+          <div
+            v-for="message in messages"
+            :key="message.id"
+            style="display: flex; width:100%;"
+            class="message-body"
+          >
+            <div
+              class="author-message-body box"
+              v-if="message.author == author"
+              style="background-color:lightgreen; width:100%"
+            >
+              <div class="name">
+                <span class="teal-text">You</span>
+              </div>
+              <div class="time-message">
+                <div class="my-message">
+                  <p class="is-size-5">{{message.content}}</p>
+                </div>
+                <div class="time">
+                  <p class="is-size-7">{{message.timestamp}}</p>
+                </div>
+              </div>
             </div>
-            <div class="time-message">
-              <div class="my-message">
-                <p class="is-size-5">
-                  {{message.content}}
-                </p>
+            <div
+              class="friend-message-body box"
+              v-if="message.author != author"
+              style="background-color:lightblue; width:100%"
+            >
+              <div class="name">
+                <span class="teal-text">{{ message.author}}</span>
+              </div>
+              <div class="time-message">
+                <div class="my-message">
+                  <p class="is-size-5">{{message.content}}</p>
+                </div>
+                <div class="time">
+                  <p class="is-size-7">{{message.timestamp}}</p>
+                </div>
+              </div>
+            </div>
           </div>
-            <div class="time">
-              <p class="is-size-7"> 
-                {{message.timestamp}}
-              </p>
-              
-          </div>
-            </div>
-            </div>
         </div>
         <div class="new-message">
-          <NewMessage :author="author" :recipient="recipient"/>
+          <NewMessage :author="author" :recipientEmail="this.recipient"/>
         </div>
-        You are messaging {{recipient}}
       </div>
+      <div class="right-messages-div">You are messaging {{this.recipient}}</div>
     </div>
-    
   </div>
 </template>
 
 <script>
 import NewMessage from "@/components/messenger/NewMessage";
+import MessageBox from "@/components/messenger/MessageBox";
 import db from "@/firebase/init";
 import firebase from "firebase";
-import moment from "moment"
+import moment from "moment";
 export default {
   name: "Messenger",
   data() {
     return {
       messages: [],
       author: firebase.auth().currentUser.email,
-      recipients: ["Antek Szadaj","Lenny Johansson","Daniel Wassing"]
+      friends: [],
+      recipient: null,
+      hasFriends: true
     };
   },
-  props: ["recipient"],
+  props: ["recipientEmail"],
   components: {
-    NewMessage
+    NewMessage,
+    MessageBox
   },
   methods: {
-    createChatBox(){
-      var chatDBReference = null
-        if(this.recipient > this.author){
-          chatDBReference = this.recipient+this.author
-        }else{
-          chatDBReference = this.author+this.recipient
-        }
-    let ref = db.collection("messenger").doc(chatDBReference).collection("messages").orderBy("timestamp");
-
-    ref.onSnapshot(snapshot => {
-      snapshot.docChanges().forEach(change => {
-        if (change.type == "added") {
-          let doc = change.doc;
-          this.messages.push({
-            id: doc.id,
-            author: doc.data().author,
-            content: doc.data().content,
-            timestamp: moment(doc.data().timestamp).format('MMMM Do YYYY, h:mm:ss a')
-          });
-        }
-      });
-    });
-    },
-    createFriendsList(){
-
-      let ref = db.collection("conversations").doc(this.author).collection("users").orderBy("timestamp");
+    createChatBox(friendEmail) {
+      this.messages = [];
+      var chatDBReference = null;
+      if (friendEmail > this.author) {
+        chatDBReference = friendEmail + this.author;
+      } else {
+        chatDBReference = this.author + friendEmail;
+      }
+      let ref = db
+        .collection("messenger")
+        .doc(chatDBReference)
+        .collection("messages")
+        .orderBy("timestamp");
 
       ref.onSnapshot(snapshot => {
         snapshot.docChanges().forEach(change => {
@@ -94,38 +111,89 @@ export default {
               id: doc.id,
               author: doc.data().author,
               content: doc.data().content,
-              timestamp: moment(doc.data().timestamp).format('MMMM Do YYYY, h:mm:ss a')
+              timestamp: moment(doc.data().timestamp).format(
+                "MMMM Do YYYY, h:mm:ss a"
+              )
             });
           }
         });
       });
+    },
+    loadConversation(friend) {
+      console.log("Load conversation " + friend);
+      this.createChatBox(friend);
+      this.recipient = friend;
+    },
+    createFriendsList() {
+      let ref = db
+        .collection("conversations")
+        .doc(this.author)
+        .collection("users")
+        .orderBy("last_contacted");
+      console.log("ref");
+      console.log(ref);
+
+      ref.onSnapshot(snapshot => {
+        console.log(snapshot);
+        snapshot.docChanges().forEach(change => {
+          console.log("conversations " + change.type);
+          if (change.type == "added") {
+            let doc = change.doc;
+            console.log("New change!");
+            console.log(!this.friends.includes(doc.data().id));
+            console.log(this.friends);
+            console.log(doc.data().id);
+            if (!this.friends.includes(doc.data().id)) {
+              this.friends.unshift(doc.data().id);
+            }
+          }
+        });
+        this.setRecipient();
+      });
+    },
+    setRecipient() {
+      console.log("recipientEmail");
+      console.log(this.recipientEmail);
+      if (this.recipientEmail) {
+        console.log("has rec");
+        this.recipient = this.recipientEmail;
+        this.loadConversation(this.recipient);
+      } else if (this.friends.length == 0) {
+        this.hasFriends = false;
+        console.log("No frineds yet!");
+      } else {
+        console.log(this.friends);
+        this.recipient = this.friends[0];
+        this.loadConversation(this.recipient);
+      }
     }
   },
   created() {
-    this.createChatBox();
     this.createFriendsList();
   }
 };
 </script>
 
 <style>
-.center-messages-div{
-  height:97vh;
+.body-messages-div {
+  position: fixed;
+  height: 97vh;
   display: flex;
   align-self: center;
-  background-color: blue;
   width: 100%;
 }
 
-.friend-body{
+.friend-body {
   width: 15rem;
 }
-.left-messages-div{
+.left-messages-div {
   display: flex;
-  background-color: red;
   flex: 1;
 }
-
+.right-messages-div {
+  display: flex;
+  flex: 2;
+}
 .chat h2 {
   font-size: 2.6em;
   margin-bottom: 40px;
@@ -137,90 +205,89 @@ export default {
 .chat .time {
   font-size: 1.2em;
 }
-.chat{
-  margin-top:4rem;
+.chat {
+  margin-top: 3rem;
   display: flex;
   flex-direction: column;
   justify-content: bottom;
   align-items: bottom;
-  height:auto;
+  height: auto;
 }
-.new-message{
-  display: flex;
+.new-message {
+  width: 100%;
 }
 
 @media screen and (max-width: 600px) {
-  .new-message{
-  width: 100%;
+  .new-message {
+    width: 100%;
   }
 }
 
-.messages{
+.messages {
   display: flex;
   flex-direction: column;
   align-items: center;
-  justify-content: flex-end;
-  overflow: auto;
+  width: 100%;
   flex: 6;
 }
 
-
-.messages::-webkit-scrollbar-track{
+.messages::-webkit-scrollbar-track {
   background: #ddd;
 }
-.messages::-webkit-scrollbar-thumb{
+.messages::-webkit-scrollbar-thumb {
   background: #aaa;
 }
-.messages::-webkit-scrollbar{
+.messages::-webkit-scrollbar {
   width: 3px;
 }
 
-.card{
-  display: flex;
-  flex-direction: column;
-  justify-content: center;
-  align-items: center;
-
-}
-
-.message-body{
-  display: flex;
-  width: 100%;
-  justify-content: space-between;
-  border-top: #000;
-}
-
-@media screen and (max-width: 600px) {
-  .message-body{
-  display: flex;
-  width: 100%;
-  border-top: #000;
-}
-}
-
-.my-message{
-  flex: 2;
-  display: flex;
-  justify-content: flex-end;
-  align-items: flex-end;
-  padding: 10px;
-}
-.time{
+.time {
   display: flex;
   padding: 0.1rem;
   flex: 1;
   justify-content: flex-end;
   align-items: flex-end;
 }
-.name{
+
+.name {
   display: flex;
   align-self: flex-start;
   flex: 1;
 }
 
-.time-message{
-  flex:5;
+.message-body {
+  display: flex;
+  width: 100%;
+}
+.my-message {
+  flex: 2;
+  display: flex;
+  justify-content: flex-end;
+  align-items: flex-end;
+  padding: 10px;
+}
+.time-message {
+  flex: 5;
   display: flex;
   flex-direction: column;
+}
+.card {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+}
+
+@media screen and (max-width: 600px) {
+  .message-body {
+    display: flex;
+    width: 100%;
+    border-top: #000;
+  }
+}
+
+.center-messages-div {
+  display: flex;
+  flex: 5;
 }
 </style>

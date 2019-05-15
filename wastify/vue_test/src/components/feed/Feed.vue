@@ -1,10 +1,8 @@
 <template>
   <div class="hello">
-    <a class="button is-primary" title="Disabled button" disabled style="position:fixed; ">Disabled</a>
     <div class="content">
       <div class="center-div">
         <div class="top-container">
-
           <!--<InfoBox class="animated" />-->
           <div id="newpost_div">
             <NewPost :method="getFreshPosts" style=" width:45rem; zIndex:1" class="animated"/>
@@ -24,7 +22,7 @@
           <div id="sentinel" v-if="hasMorePosts">
             <a class="button is-rounded is-loading"></a>
           </div>
-          <div class="loading-container" v-if="!hasMorePosts">
+          <div class="loading-container" v-if="!hasMorePosts" style="margin-bottom:5rem">
               No more posts
             </div>
           

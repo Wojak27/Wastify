@@ -104,7 +104,7 @@ export default {
 
     },
     messageUser(){
-      this.$router.push({ name: "Messenger", params: { recipient: this.authorEmail } });
+      this.$router.push({ name: "Messenger", params: { recipientEmail: this.authorEmail } });
     },
     getImageFromFirebase(){
       console.log("ImageReference: "+ this.imageReference)
