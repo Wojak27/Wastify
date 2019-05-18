@@ -28,7 +28,7 @@
           
           
           </div>
-        <ProfileBar  id="profile-bar-css" :userEmail="userEmail" class="animated profile-bar" />
+        <ProfileBar  id="profile-bar-css" :userEmail="userEmail" :postNumber="postNumber" class="animated profile-bar" />
         
         </div>     
              
@@ -39,7 +39,7 @@
 
 <script>
 import "bulma/css/bulma.css";
-import ProfileBar from "@/components/ProfileBar";
+import ProfileBar from "@/components/feed/ProfileBar";
 import Footer from "@/components/Footer";
 import Tiles from "@/components/Tiles";
 import PostBox from "@/components/feed/PostBox";
@@ -75,7 +75,8 @@ export default {
       socket: null,
       hasMorePosts: true,
       counter: 1,
-      user_id: firebase.auth().currentUser.uid
+      user_id: firebase.auth().currentUser.uid,
+      postNumber: 0
     };
   },
   methods: {
@@ -83,6 +84,7 @@ export default {
       this.counter = 1
       this.posts = []
       this.getPosts()
+      this.getUserPostNumber()
     },
     getPosts(){
       this.loading = true
@@ -120,10 +122,29 @@ export default {
       })
       .catch(error => console.log(error))
       },
-      onScrollMethod(){
-        
-         
-      }
+      getUserPostNumber(){
+        const Url = 'http://localhost:5001/get_post_number/'+this.user_id
+
+        axios.get(Url)
+          .then(response => {
+            
+            console.log(response.data)
+            this.postNumber = response.data
+            })
+          .catch(error => console.log(error))
+      },
+      getUserPostNumber(){
+        const Url = 'http://localhost:5001/get_post_number/'+this.user_id
+
+        axios.get(Url)
+          .then(response => {
+            
+            console.log(response.data)
+            this.postNumber = response.data
+            })
+          .catch(error => console.log(error))
+      },
+      
   },
   mounted() {
     // Setting up all of the intersecion observers
@@ -159,7 +180,7 @@ export default {
     console.log(firebase.auth().currentUser.uid)
   },
   created() {
-    
+    this.getUserPostNumber()
   },
 };
 </script>

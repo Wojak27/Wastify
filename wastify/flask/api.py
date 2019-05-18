@@ -45,6 +45,7 @@ ma = Marshmallow(app)
 #    user_id = db.Column(db.String(200), db.ForeignKey('user.firebase_id'), nullable=False)
 
 # post Class/Model
+# A post can also be an event if you give the lat and lgn (later addition, hence why)
 class Post(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     #name = db.Column(db.String(100), unique=True)
@@ -57,6 +58,9 @@ class Post(db.Model):
     timestamp = db.Column(db.Integer, nullable= False)
     timeOfTheEvent = db.Column(db.String(200), nullable= True)
     imageReference = db.Column(db.String(200), nullable= True)
+    comments = db.relationship('Comment', 
+                            backref='post',
+                            lazy='dynamic')
     # add date, time, location, imgSrc and name 
 
     # removed the lat and lng from here, have got to remove it from the 
@@ -70,6 +74,18 @@ class Post(db.Model):
         self.timestamp = timestamp
         self.imageReference = imageReference
         self.timeOfTheEvent = timeOfTheEvent
+
+#################### comment Class/Model
+class Comment(db.Model):
+    id = db.Column(db.Integer, primary_key=True)
+    description = db.Column(db.Text, nullable= False)
+    authorEmail = db.Column(db.String(200), db.ForeignKey('post.authorEmail'), nullable=False)
+    timestamp = db.Column(db.Integer, nullable= False)
+
+    def __init__(self,description, authorEmail, timestamp):
+        self.description = description
+        self.authorEmail = authorEmail
+        self.timestamp = timestamp
 
 # For future possibility to follow people
 # subs = db.Table(
@@ -119,8 +135,8 @@ class User(db.Model):
         self.firebase_id = firebase_id
         self.username = username
         self.emailAddress = emailAddress
-        self.description = ""
-        self.motto = ""
+        self.description = "Write something about yourself!"
+        self.motto = "You don't have any motto!"
         self.posts = []
         self.creation_time = creation_time
         self.following = []
@@ -155,6 +171,11 @@ class UserSchema(ma.Schema):
 class PostSchema(ma.Schema):
      class Meta:
          fields = ('id', 'description', 'authorEmail', 'lat', 'lng', 'timestamp', 'imageReference', 'title')
+        
+# comment Schema
+class CommentSchema(ma.Schema):
+     class Meta:
+         fields = ('id', 'description', 'authorEmail', 'timestamp')
 
 # Comment Schema
 # class CommentSchema(ma.Schema):
@@ -181,7 +202,27 @@ def add_post():
 
     return post_schema.jsonify(new_post)
 
-# Get selected posts
+# Create a comment
+@app.route('/add_comment/<postID>', methods=['POST'])
+def add_comment(postID):
+    print("Adding a new comment")
+    description = request.json['description']
+    authorEmail = request.json['authorEmail']
+    timestamp = request.json['timestamp']
+
+    # Create the comment
+    new_comment = Comment(description, authorEmail, timestamp)
+
+    # Get the post for the comment from ID
+    post = Post.query.get(int(postID))
+    post.comments.append(new_comment)
+
+    db.session.commit()
+
+    return comment_schema.jsonify(new_comment)
+
+# Get selected posts. This method is adapted for the infinite scroll,
+# hence the different return statements
 @app.route('/latest_posts/<index>', methods=['GET'])
 def get_selected_posts(index):
     post_limit = 5
@@ -211,6 +252,13 @@ def get_selected_posts(index):
 def get_posts():
     all_posts = Post.query.order_by(desc(Post.timestamp)).all()
     result = posts_schema.dump(all_posts)
+    return jsonify(result.data)
+
+# Get all comments for the posts
+@app.route('/get_comments/<postID>', methods=['GET'])
+def get_comments(postID):
+    comments = Post.query.get(int(postID)).comments.all()
+    result = comments_schema.dump(comments)
     return jsonify(result.data)
 
 #Get one post
@@ -263,6 +311,19 @@ def get_likes(post_id):
     post = Post.query.get(int(post_id))
     return str(len(post.user_likes.all()))
 
+# Get comments 
+@app.route('/get_comments_num/<post_id>', methods=['GET'])
+def get_comments_number(post_id):
+    post = Post.query.get(int(post_id))
+    return str(len(post.comments.all()))
+
+# Get number of posts
+@app.route('/get_post_number/<uID>', methods=['GET'])
+def get_post_number(uID):
+    user = User.query.get(uID)
+    print("posts: ", user.posts.all())
+    return str(len(user.posts.all()))
+
 # Delete post
 @app.route('/post/<id>', methods=['DELETE'])
 def delete_post(id):
@@ -277,20 +338,17 @@ def has_liked():
     post_id = request.json['post_id']
     post = Post.query.get(int(post_id))
     firebase_id = request.json['firebase_id']
-    print("Has liked")
     for user in post.user_likes.all():
         if user.firebase_id in firebase_id:
             return "True"
-    #print(db.session.query(post.user_likes.user_id).filter_by(name=firebase_id).scalar() is not None)
-    #if str(firebase_id) in post.user_likes.all():
     return "False"
-    #else: 
-    #    return "False"
 
-# Init schema
+# Init schemas
 post_schema = PostSchema(strict=True)
 posts_schema = PostSchema(many=True, strict=True)
 
+comment_schema = CommentSchema(strict=True)
+comments_schema = CommentSchema(many=True, strict=True)
 
 
 # Create a User

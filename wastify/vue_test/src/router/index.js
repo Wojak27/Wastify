@@ -25,6 +25,7 @@ const router = new Router({
       path: "/map",
       name: "Map",
       component: GMap,
+      props: true,
       meta: {
         requiresAuth: true
       }

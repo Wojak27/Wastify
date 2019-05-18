@@ -7,12 +7,11 @@
 
       <div class="bottomContainerProfile" >
         <a class="button is-white" @click="goToUserProfile">{{userEmail}}</a>
-        <p>I like trash</p>
-        <p>Tell me about your ambitions with trash!</p>
-        
+        <p>{{motto}}</p>
+        <h2 class="is-size-5">You have written: {{postNumber}} posts</h2>
       </div>
       <div class="imageDivProfile">
-        <img src="../assets/profile_picture.jpg" alt class style="object-fit: cover;">
+        <img src="../../assets/profile_picture.jpg" alt class style="object-fit: cover;">
       </div>
       
     </div>
@@ -22,22 +21,22 @@
 <script>
 import firebase from 'firebase'
 import "bulma/css/bulma.css";
+import axios from "axios";
+
 export default {
   name: "ProfileBar",
-  props:['userEmail'],
+  props:['userEmail', 'postNumber'],
   data() {
     return {
-      username: "Username"
+      motto: "I like trash, tell me about your ambitions with trash!",
+      user_id: firebase.auth().currentUser.uid,
     };
   },
   methods: {
     goToUserProfile(){
       this.$router.push({ name: "ProfilePage", params: { authorEmail: this.userEmail } });
-    },
-  },
-  created() {
-    //username = firebase.auth().currentUser.displayName
-  },
+    }
+  }
 };
 </script>
 

@@ -6,7 +6,7 @@
 
       </div>
       <div class="header-container">
-        <div class="left-div"> <h1 class="is-size-6">Karol Wojtulewicz</h1>
+        <div class="left-div">
         <p class="is-size-7">{{authorEmail}}</p>
         <p class="is-size-7">{{timestamp}}</p>
             
@@ -23,15 +23,16 @@
           <a class="button is-fullwidth is-rounded" @click="likePost" :id="this.post_id">
             <i class="fas fa-leaf" style="margin-right:10px;"></i> Eco {{likes}}
           </a>
+          
         </div>
       </div>
       
 
       <div class="bottomContainer">
 
-          <h3 v-if="title">{{title}}</h3>
+          <h3 v-if="title" @click="showOnMap">{{title}}</h3>
           <p>{{text}}</p>
-
+          <span class="tag is-link is-normal is-rounded"><i class="fas fa-comment-dots" style="margin-right:0.5rem;"></i>{{commentsNumber}} Comments</span>
       </div>
       
 
@@ -51,6 +52,7 @@ export default {
       url: "../../assets/trash.jpg",
       likes: 0,
       isSameUser: false,
+      commentsNumber: 0
     };
   },
   methods: {
@@ -106,6 +108,21 @@ export default {
     messageUser(){
       this.$router.push({ name: "Messenger", params: { recipientEmail: this.authorEmail } });
     },
+    showOnMap(){
+      this.$router.push({ name: "Map", params: { selectedPostID: this.post_id } });
+    },
+    
+    getCommentsNum(){
+      const Url = 'http://localhost:5001/get_comments_num/'+this.post_id
+
+      axios.get(Url)
+        .then(response => {
+          
+          console.log(response.data)
+          this.commentsNumber = response.data
+          })
+        .catch(error => console.log(error))
+    },
     getImageFromFirebase(){
       console.log("ImageReference: "+ this.imageReference)
 
@@ -121,6 +138,7 @@ export default {
     this.getLikes()
     this.checkIfLiked()
     this.checkIfSameUser()
+    this.getCommentsNum()
   },
 };
 </script>
