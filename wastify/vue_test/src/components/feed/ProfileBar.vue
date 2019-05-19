@@ -30,13 +30,24 @@ export default {
     return {
       motto: "I like trash, tell me about your ambitions with trash!",
       user_id: firebase.auth().currentUser.uid,
+      motto: "",
+      userID: firebase.auth().currentUser.uid,
     };
   },
   methods: {
     goToUserProfile(){
       this.$router.push({ name: "ProfilePage", params: { authorEmail: this.userEmail } });
-    }
-  }
+    },
+    downloadUserInfo(){
+        const url = 'http://localhost:5001/user/id/'+this.userID
+        axios.get(url).then(response => {
+          this.motto = response.data.motto
+        }).catch(error => console.log(error))
+      },
+  },
+  created() {
+    this.downloadUserInfo()
+  },
 };
 </script>
 
@@ -46,7 +57,7 @@ export default {
 }
 .boxProfile {
   width: 13rem;
-  height: 600px;
+  height: 400px;
   margin: 0px 0px 0px 0;
   background-color: rgb(219, 255, 236);
   border-radius: 10px;

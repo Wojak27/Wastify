@@ -12,9 +12,6 @@
           <br/>
           <small>{{timestamp}}</small>
           <br>
-          <strong v-if="title">{{title}}</strong>
-          <br>
-          
           {{text}}
         </p>
       </div>

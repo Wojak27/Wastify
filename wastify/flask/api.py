@@ -24,10 +24,8 @@ db = SQLAlchemy()
 basedir = os.path.abspath(os.path.dirname(__file__))
 
 # Database 
-#path = 'postgresql:///var/run/postgresql/.s.PGSQL.5432'
-#print(path)
+
 app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///'+os.path.join(basedir, 'db.sqlite')
-#app.config['SQLALCHEMY_DATABASE_URI'] = 'postgresql+psycopg2://postgres:postgres@localhost:15432'
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 
 # Init db
@@ -37,12 +35,6 @@ db = SQLAlchemy(app)
 ma = Marshmallow(app)
 
 ########################## SCHEMAS #######################################
-
-# Here all of the post followers are contained
-# the user_id also works as a reference to an actual user
-#class PostFollowers(db.Model):
-#    id = db.Column(db.Integer, primary=True) 
-#    user_id = db.Column(db.String(200), db.ForeignKey('user.firebase_id'), nullable=False)
 
 # post Class/Model
 # A post can also be an event if you give the lat and lgn (later addition, hence why)
@@ -61,7 +53,6 @@ class Post(db.Model):
     comments = db.relationship('Comment', 
                             backref='post',
                             lazy='dynamic')
-    # add date, time, location, imgSrc and name 
 
     # removed the lat and lng from here, have got to remove it from the 
     # backend as well
@@ -87,14 +78,6 @@ class Comment(db.Model):
         self.authorEmail = authorEmail
         self.timestamp = timestamp
 
-# For future possibility to follow people
-# subs = db.Table(
-#     'Subs',
-#     Base.metadata,
-#     db.Column('ParentChildId', db.Integer, primary_key=True),
-#     db.Column('follower_id', db.String(200), db.ForeignKey('User.FirebaseID')),
-#     db.Column('following_id', db.String(200), db.ForeignKey('User.FirebaseID')))
-
 likes = db.Table(
     'Likes',
     db.Column('user_id', db.String(200), db.ForeignKey('user.firebase_id')),
@@ -110,7 +93,7 @@ class User(db.Model):
     #following = db.relationship('User', backref='followe', lazy=True)
     description = db.Column(db.Text, nullable=True)
     motto = db.Column(db.Text, nullable = True)
-    #likedPosts = db.relationship('Post', backref='hasLiked', lazy=True, nullable = True)
+
     #creating the relation to the post
     posts = db.relationship('Post', 
                             backref='author',
@@ -120,17 +103,8 @@ class User(db.Model):
     creation_time = db.Column(db.Integer, nullable = False)
 
     liked_posts = db.relationship('Post', secondary=likes, backref=db.backref('user_likes', lazy = 'dynamic'))
-    ### This is just a test for relationships and self referal ###
+    ### This is just a test for relationships and self referal ###    
 
-    # following = db.relationship('User',
-    #                             secondary=subs,
-    #                             primaryjoin=firebase_id == subs.c.follower_id,
-    #                             secondaryjoin=firebase_id == subs.c.following_id,
-    #                              backref=db.backref('followers', lazy = 'dynamic'))
-    
-    
-
-    # add date, time, imgSrc and username 
     def __init__(self,firebase_id, username, emailAddress, creation_time):
         self.firebase_id = firebase_id
         self.username = username
@@ -139,33 +113,13 @@ class User(db.Model):
         self.motto = "You don't have any motto!"
         self.posts = []
         self.creation_time = creation_time
-        self.following = []
-
-    ############### For testing ################
-    # def __init__(self,firebase_id, username):
-    #     self.firebase_id = firebase_id
-    #     self.username = username
-    #     self.emailAddress = "emailAddress"
-    #     self.description = ""
-    #     self.motto = ""
-    #     self.posts = []
-    #     self.creation_time = "1"
-    #     self.following = []
-
-# class Comment(db.Model):
-#     comment_id = db.Column(db.Integer, primary_key=True)
-#     comment_text = db.Column(db.Text, nullable= False)
-#     authorEmail = db.Column(db.String(200), db.ForeignKey('user.emailAddress'), nullable=False)
-#     postId = db.Column(db.String(200), db.ForeignKey('post.id'), nullable=False)
-#     timestamp = db.Column(db.Integer, nullable= False)
-
-    
+        self.following = []    
 
 ######################### SCHEMAS ##############################
 # User Schema
 class UserSchema(ma.Schema):
      class Meta:
-         fields = ('firebase_id', 'username', 'emailAddress', 'creation_time')
+         fields = ('firebase_id', 'username', 'emailAddress', 'creation_time', 'motto')
 
 # post Schema
 class PostSchema(ma.Schema):
@@ -177,10 +131,6 @@ class CommentSchema(ma.Schema):
      class Meta:
          fields = ('id', 'description', 'authorEmail', 'timestamp')
 
-# Comment Schema
-# class CommentSchema(ma.Schema):
-#      class Meta:
-#          fields = ('comment_text', 'authorEmail', 'timestamp', 'postId')
 ########################## THE API #######################################
 
 # Create a post
@@ -291,7 +241,7 @@ def update_post(id):
     db.session.commit()
 
     return post_schema.jsonify(post)
-
+0
 # Like post
 @app.route('/like_post', methods=['POST'])
 def like_post():
@@ -405,7 +355,20 @@ def update_User(firebase_id):
 
     db.session.commit()
 
-    return user_schema.jsonify(User)
+    return user_schema.jsonify(user)
+
+# Update a User motto
+@app.route('/user/update_user_motto/<firebase_id>', methods=['PUT'])
+def update_User_motto(firebase_id):
+    user = User.query.get(firebase_id)
+    
+    motto = request.json['motto']
+
+    user.motto = motto
+
+    db.session.commit()
+
+    return user_schema.jsonify(user)
 
 # Delete User
 @app.route('/user/delete_user/<firebase_id>', methods=['DELETE'])
@@ -422,35 +385,6 @@ def delete_User(firebase_id):
 user_schema = UserSchema(strict=True)
 users_schema = UserSchema(many=True, strict=True)
 
-
-# Create a comment
-# @app.route('/comment/', methods=['POST'])
-# def add_comment():
-#     print("Adding a new comment")
-#     comment_text = request.json['comment_text']
-#     authorEmail = request.json['authorEmail']
-#     timestamp = request.json['timestamp']
-#     postId = request.json['postId']
-    
-
-#     new_comment = Comment(comment_text, authorEmail, timestamp, postId)
-
-#     db.session.add(new_comment)
-#     db.session.commit()
-
-#     return post_schema.jsonify(new_comment)
-
-# Get all comments
-# @app.route('/get_comments/<postId>', methods=['GET'])
-# def get_comments(postId):
-#     all_comments = Comment.query.order_by(desc(Comment.timestamp)).all()
-#     result = posts_schema.dump(all_comments)
-#     return jsonify(result.data)
-
-# comment_schema = CommentSchema(strict=True)
-# comment_schema = CommentSchema(many=True, strict=True)
-
-# For testing tests
 def testFunction(a):
     return 1
 

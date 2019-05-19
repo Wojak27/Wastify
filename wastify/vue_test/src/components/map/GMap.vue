@@ -7,18 +7,36 @@
       <div class="post-area box" v-if="description">
   
         <h1 class="is-size-3" v-if="title">{{title}}</h1>
-        <img :src="imageUrl" id="postImageContainer" v-if="this.imageReference">
+        <div class="image-container-gmap">
+          <img :src="this.imageUrl" id="postImageContainer" v-if="this.imageReference" @error="handleError">
+        </div>
+        
         <br>
-        <p class="is-size-7">{{authorEmail}}</p>
-        <p class="is-size-7">{{timestamp}}</p>
-        <br>
-        <a href="#" @click="messageUser" class="button is-fullwidth is-info is-rounded" v-if="!this.isSameUser">
-          <i class="fas fa-reply" aria-hidden="true" style="margin-right:10px"></i> Message
-        </a>
-        <a class="button is-fullwidth is-rounded" @click="likePost" :id="this.post_id">
-          <i class="fas fa-leaf" style="margin-right:10px;"></i> Eco {{likes}}
-        </a>
-        <p>{{description}}</p>
+        <div class="under-image-container">
+          <div class="header-container">
+            <div class="left-div">
+              <p class="is-size-7">{{authorEmail}}</p>
+              <p class="is-size-7">{{timestamp}}</p>
+  
+            </div>
+            <div class="imageDivProfileSmall">
+              <img src="../../assets/profile_picture.jpg" alt class class="img-background" style="object-fit: cover;">
+            </div>
+            <div class="right-div">
+  
+              <a href="#" @click="messageUser" class="button is-fullwidth is-info is-rounded" v-if="!this.isSameUser">
+                <i class="fas fa-reply" aria-hidden="true" style="margin-right:10px"></i> Message
+              </a>
+              <a class="button is-fullwidth is-rounded" @click="likePost" :id="this.post_id">
+                <i class="fas fa-leaf" style="margin-right:10px;"></i> Eco {{likes}}
+              </a>
+  
+            </div>
+          </div>
+  
+          <p>{{description}}</p>
+        </div>
+  
         <br>
         <hr>
         <p class="is-size-5"><strong>Comments:</strong></p>
@@ -58,7 +76,7 @@
         lng: -2,
         title: null,
         description: null,
-        imageRef: null,
+        imageReference: null,
         eventType: null,
         authorEmail: null,
         timestamp: null,
@@ -74,6 +92,15 @@
       this.getUserPositionOnMap()
     },
     methods: {
+      handleError(e){
+        // I have no clue why downloading an image from the firebase does not work...
+        console.log("Handle image error")
+        console.log(e)
+        console.log("image ref: "+ this.imageReference)
+        this.imageUrl = "http://moritzdentalcare.com/wp-content/uploads/2016/10/orionthemes-placeholder-image.png"
+        setTimeout(function(){ this.imageUrl = 'https://firebasestorage.googleapis.com/v0/b/geo-location-web-app.appspot.com/o/eventHeaderImages%2F' + this.imageReference + '?alt=media' }, 3000);
+      
+      },
       likePost() {
         console.log("Post liked: " + this.post_id + " username: " + this.user_id)
         const Url = 'http://localhost:5001/like_post'
@@ -148,7 +175,6 @@
                 .get()
                 .then(snapshot => {
                   console.log("Saving geolocation");
-                  console.log(credentials.uid);
                   snapshot.forEach(doc => {
                     console.log(doc.id);
                     db.collection("users")
@@ -179,10 +205,10 @@
       placePostsOnMap(map) {
         axios.get('http://localhost:5001/latest_posts')
           .then(response => {
+            // for selecting a marker programatically 
+            // when the user clicks on the post
             var selectedMarker = null
             response.data.forEach(element => {
-              console.log("Placing markers")
-              console.log(element)
               var icon = {
                 url: "http://www.newdesignfile.com/postpic/2014/07/map-icon_150412.png", // url
                 scaledSize: new google.maps.Size(50, 50), // scaled size
@@ -210,14 +236,14 @@
               });
               console.log("Selected post id")
               console.log(this.selectedPostID)
-              if(this.selectedPostID && element.id == this.selectedPostID){
+              if (this.selectedPostID && element.id == this.selectedPostID) {
                 selectedMarker = marker
               }
             });
-            if(selectedMarker){
+            if (selectedMarker) {
               google.maps.event.trigger(selectedMarker, 'click')
             }
-            
+  
           })
           .catch(error => console.log(error))
   
@@ -260,6 +286,7 @@
               this.imageUrl = 'https://firebasestorage.googleapis.com/v0/b/geo-location-web-app.appspot.com/o/eventHeaderImages%2F' + this.imageReference + '?alt=media'
   
             }
+            console.log("Image url: " + this.imageUrl)
             this.post_id = id
             this.getComments(id)
             this.getLikes()
@@ -317,7 +344,14 @@
               if (data.geolocation) {
                 //has geolocaiton
                 console.log(data.user_id);
+                var icon = {
+                  url: "https://cmxpv89733.i.lithium.com/t5/image/serverpage/image-id/165436i36DCE8AF5DF64A5A/image-size/large?v=1.0&px=999", // url for the icon
+                  scaledSize: new google.maps.Size(50, 50), // scaled size
+                  origin: new google.maps.Point(0, 0), // origin
+                  anchor: new google.maps.Point(0, 0) // anchor
+                };
                 let marker = new google.maps.Marker({
+  
                   position: {
                     lat: data.geolocation.lat,
                     lng: data.geolocation.log
@@ -325,7 +359,8 @@
                   // icon: "https://img.icons8.com/wired/2x/map.png",
                   map: map,
                   title: data.user_id,
-                  animation: google.maps.Animation.DROP
+                  animation: google.maps.Animation.DROP,
+                  icon: icon,
   
                 });
                 //add click event to marker
@@ -342,7 +377,6 @@
 </script>
 
 <style>
-  .post-area {}
   
   .google-map {
     width: 100%;
@@ -351,6 +385,12 @@
     position: relative;
   }
   
+  .image-container-gmap{
+    min-height: 10rem;
+    background-image: url("https://media3.giphy.com/media/3oEjI6SIIHBdRxXI40/giphy.gif");
+    background-repeat: no-repeat;
+    background-position: center;
+  }
   .my_map_container {
     background-color: green;
     width: 50rem;
