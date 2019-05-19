@@ -11,7 +11,7 @@
         <h2 class="is-size-5">You have written: {{postNumber}} posts</h2>
       </div>
       <div class="imageDivProfile">
-        <img src="../../assets/profile_picture.jpg" alt class style="object-fit: cover;">
+        <img :src="profileImageUrl" alt class style="object-fit: cover;">
       </div>
       
     </div>
@@ -32,6 +32,7 @@ export default {
       user_id: firebase.auth().currentUser.uid,
       motto: "",
       userID: firebase.auth().currentUser.uid,
+      profileImageUrl: null,
     };
   },
   methods: {
@@ -42,6 +43,7 @@ export default {
         const url = 'http://localhost:5001/user/id/'+this.userID
         axios.get(url).then(response => {
           this.motto = response.data.motto
+          this.profileImageUrl = response.data.profileImageRef
         }).catch(error => console.log(error))
       },
   },

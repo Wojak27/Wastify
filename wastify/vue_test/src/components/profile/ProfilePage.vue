@@ -1,5 +1,5 @@
 <template>
-  <section class="hero is-fullheight my-section">
+  <section class="hero is-fullheight my-section" id="user-background">
     <div class="hello">
       <div class="centered-content box animated bounceInUp">
         <div class="top-div">
@@ -7,7 +7,7 @@
             <p class="is-size-6 has-text-white">{{ authorEmail }}</p>
           </div>
           <div class="imageDivProfileBig">
-            <img src="../../assets/profile_picture.jpg" alt class="img-background" style="object-fit: cover;">
+            <img :src="this.profileImageUrl" alt class="img-background" style="object-fit: cover;">
           </div>
           <div class="top-right-div">
             <a class="button is-primary" @click="messageUser" v-if="isNotTheUser">
@@ -29,19 +29,7 @@
                   </span>
                 </label>
             </div>
-            <div class="file" v-if="!isNotTheUser">
-              <label class="file-label">
-                  <input class="file-input" type="file" name="resume" value="upload" @change="changeBackgroundImage">
-                  <span class="file-cta">
-                    <span class="file-icon">
-                      <i class="fas fa-images"></i>
-                    </span>
-                    <span class="file-label">
-                      Change background
-                    </span>
-                  </span>
-                </label>
-            </div>
+            
           </div>
         </div>
   
@@ -66,7 +54,7 @@
   import firebase from "firebase";
   import animate from "animate.css";
   import axios from "axios";
-
+  import imageCompression from 'browser-image-compression';
   export default {
     name: "ProfilePage",
     props: ["authorEmail"],
@@ -77,6 +65,9 @@
         edit_button_title: "Edit",
         motto: "Lorem ipsum dolor sit amet consectetur adipisicing elit. Blanditiis, voluptatibus.",
         userID: firebase.auth().currentUser.uid,
+        profileImageUrl: null,
+        backgroundImageUrl: null,
+        profilePicture: null,
       };
     },
     methods: {
@@ -115,10 +106,80 @@
         const url = 'http://localhost:5001/user/id/'+this.userID
         axios.get(url).then(response => {
           this.motto = response.data.motto
+          this.profileImageUrl = response.data.profileImageRef
         }).catch(error => console.log(error))
       },
-      changeProfileImage() {
-        console.log("change Profile image");
+      async changeProfileImage(event) {
+        console.log("Got an image! " + event.target.files[0])
+        // this saves the image in the full resolution
+        //this.profilePicture = event.target.files[0]
+        var reader = new FileReader();
+  
+        reader.onload = function(e) {
+          console.log("on load")
+          $('#blah').attr('src', e.target.result);
+          document.getElementById('blah').src = e.target.result
+        }
+  
+        reader.readAsDataURL(event.target.files[0]);
+  
+        // compressing the image file
+        const imageFile = event.target.files[0];
+        console.log('originalFile instanceof Blob', imageFile instanceof Blob); // true
+        console.log(`originalFile size ${imageFile.size / 1024 / 1024} MB`);
+  
+        var options = {
+          maxSizeMB: 0.1,
+          maxWidthOrHeight: 1920,
+          useWebWorker: true
+        }
+        try {
+          const compressedFile = await imageCompression(imageFile, options);
+          console.log('compressedFile instanceof Blob', compressedFile instanceof Blob); // true
+          console.log(`compressedFile size ${compressedFile.size / 1024 / 1024} MB`); // smaller than maxSizeMB
+          this.profilePicture = compressedFile
+          this.uploadImageToFireStorage(this.userID)
+        } catch (error) {
+          console.log(error);
+        }
+      },
+      saveImageRefToDB(){
+        const url = 'http://localhost:5001/user/update_profile_image/'+this.userID
+
+        const profileImageRef = {
+          "profileImageRef": 'https://firebasestorage.googleapis.com/v0/b/geo-location-web-app.appspot.com/o/profilePictures%2F'+this.userID+'?alt=media'
+        }
+
+      axios.put(url, profileImageRef)
+        .then(response => {
+          console.log("Updating the motto successful")
+          console.log(response.data)
+          })
+        .catch(error => console.log(error))
+      },
+      uploadImageToFireStorage(firebaseReference) {
+        console.log(firebaseReference)
+
+        const storageRef = firebase.storage().ref('profilePictures/' + firebaseReference)
+        const submission = storageRef.put(this.profilePicture)
+  
+        submission.on('state_changed', (snapshot) => {
+          // Observe state change events such as progress, pause, and resume
+        }, (error) => {
+          // Handle unsuccessful uploads
+          console.log(error);
+        }, () => {
+          // Do something once upload is complete
+          console.log('Successfully uploaded the file!');
+          this.profileImageUrl = 'https://firebasestorage.googleapis.com/v0/b/geo-location-web-app.appspot.com/o/profilePictures%2F'+this.userID+'?alt=media'
+          this.saveImageRefToDB()
+        });
+      },
+      handleBackgroundImageChange(){
+        $('#user-background').css('background-image', 'url('+this.backgroundImageUrl+')');
+      },
+      handleProfileImageChange(){
+        $('#user-background').css('background-image', 'url('+')');
       },
       changeBackgroundImage() {
         console.log("change Background image");

@@ -12,7 +12,7 @@
   
       </div>
       <div class="imageDivProfileSmall">
-        <img src="../../assets/profile_picture.jpg" alt class class="img-background" style="object-fit: cover;">
+        <img :src="this.profileImageUrl" alt class class="img-background" style="object-fit: cover;">
       </div>
       <div class="right-div">
   
@@ -47,18 +47,18 @@
   
   export default {
     name: "BigPostBox",
-    props: ["authorEmail", "timestamp", "text", "title", "authorName", "location", "imageReference", "user_id", "post_id"],
+    props: ["authorEmail", "timestamp", "text", "title", "authorName", "location", "imageReference", "authorFirebaseID", "user_id", "post_id"],
     data() {
       return {
         url: "../../assets/trash.jpg",
         likes: 0,
         isSameUser: false,
-        commentsNumber: 0
+        commentsNumber: 0,
+        profileImageUrl: null,
       };
     },
     methods: {
       likePost() {
-        console.log("Post liked: " + this.post_id + " username: " + this.user_id)
         const Url = 'http://localhost:5001/like_post'
   
         const like = {
@@ -82,13 +82,18 @@
         }
         axios.post(Url, content)
           .then(response => {
-            console.log("Response data:")
-            console.log(response.data)
             if (response.data === "True") {
               $('#' + this.post_id).addClass("is-success")
             }
           })
           .catch(error => console.log(error))
+      },
+      downloadUserInfo(){
+        
+        const url = 'http://localhost:5001/user/id/'+this.authorFirebaseID
+        axios.get(url).then(response => {
+          this.profileImageUrl = response.data.profileImageRef
+        }).catch(error => console.log(error))
       },
       getLikes() {
         const Url = 'http://localhost:5001/get_likes/' + this.post_id
@@ -96,13 +101,11 @@
         axios.get(Url)
           .then(response => {
   
-            console.log(response.data)
             this.likes = response.data
           })
           .catch(error => console.log(error))
       },
       checkIfSameUser() {
-        console.log("check if same user " + this.authorEmail + " " + (this.authorEmail == firebase.auth().currentUser.email))
         this.isSameUser = (this.authorEmail == firebase.auth().currentUser.email)
   
       },
@@ -137,13 +140,11 @@
         axios.get(Url)
           .then(response => {
   
-            console.log(response.data)
             this.commentsNumber = response.data
           })
           .catch(error => console.log(error))
       },
       getImageFromFirebase() {
-        console.log("ImageReference: " + this.imageReference)
   
         this.url = 'https://firebasestorage.googleapis.com/v0/b/geo-location-web-app.appspot.com/o/eventHeaderImages%2F' + this.imageReference + '?alt=media'
         //document.getElementById('postImageContainer').src=url
@@ -158,6 +159,7 @@
       this.checkIfLiked()
       this.checkIfSameUser()
       this.getCommentsNum()
+      this.downloadUserInfo()
     },
   };
 </script>

@@ -15,56 +15,55 @@
           <div class="dropdown is-hoverable">
             <div class="dropdown-trigger">
               <button class="button" aria-haspopup="true" aria-controls="dropdown-menu">
-                <span>{{eventType}}</span>
-                <span class="icon is-small">
-                  <i class="fas fa-angle-down" aria-hidden="true"></i>
-                </span>
-              </button>
+                    <span>{{eventType}}</span>
+                    <span class="icon is-small">
+                      <i class="fas fa-angle-down" aria-hidden="true"></i>
+                    </span>
+                  </button>
             </div>
             <div class="dropdown-menu" id="dropdown-menu" role="menu">
               <div class="dropdown-content">
                 <a href="#" class="dropdown-item" @click="selectEventType(0)">
-                  Post
-                </a>
+                      Post
+                    </a>
                 <a href="#" class="dropdown-item" @click="selectEventType(1)">
-                  Trash pickup
-                </a>
-                <a class="dropdown-item" @click="selectEventType(2)"> 
-                  Sale
-                </a>
+                      Trash pickup
+                    </a>
+                <a class="dropdown-item" @click="selectEventType(2)">
+                      Sale
+                    </a>
               </div>
             </div>
           </div>
   
           <div class="file" v-if="!hasChoosenFile && !isPost">
             <label class="file-label">
-              <input class="file-input" type="file" name="resume" value="upload" @change="gotAnImage">
-              <span class="file-cta">
-                <span class="file-icon">
-                  <i class="fas fa-images"></i>
-                </span>
-                <span class="file-label">
-                  Pick an image
-                </span>
-              </span>
-            </label>
+                  <input class="file-input" type="file" name="resume" value="upload" @change="gotAnImage">
+                  <span class="file-cta">
+                    <span class="file-icon">
+                      <i class="fas fa-images"></i>
+                    </span>
+                    <span class="file-label">
+                      Pick an image
+                    </span>
+                  </span>
+                </label>
           </div>
   
           <a class="button is-link" title="Disabled button" @click="addCurrentLocationToPost" v-if="!lat && !isPost">
             <span class="icon">
-              <i class="fas fa-location-arrow btn-image"/>
-            </span>
+                  <i class="fas fa-location-arrow btn-image"/>
+                </span>
             <span>Add current location</span>
   
           </a>
           <a class="button is-danger" title="Disabled button" @click="removeLocation" v-if="lat">
             <span class="icon">
-              <i class="fas fa-location-arrow btn-image"/>
-            </span>
+                  <i class="fas fa-location-arrow btn-image"/>
+                </span>
             <span>Remove location</span>
   
           </a>
-  
   
         </div>
   
@@ -83,6 +82,7 @@
   import firebase from 'firebase'
   import VueCtkDateTimePicker from 'vue-ctk-date-time-picker';
   import 'vue-ctk-date-time-picker/dist/vue-ctk-date-time-picker.css';
+  import imageCompression from 'browser-image-compression';
   
   export default {
     name: "NewPost",
@@ -108,7 +108,6 @@
         isPost: true,
         date: new Date(),
         fileName: "https://images.pexels.com/photos/248797/pexels-photo-248797.jpeg?auto=compress&cs=tinysrgb&dpr=1&w=500"
-  
   
       }
     },
@@ -150,14 +149,12 @@
         this.hasChoosenFile = null
       },
       createPost() {
-
-        if(!this.isPost && (!this.title || !this.description || !this.lat || !this.hasChoosenFile)){
+  
+        if (!this.isPost && (!this.title || !this.description || !this.lat || !this.hasChoosenFile)) {
           this.feedback = "You need to fill in all of the fields, current location and image to create an event!"
-        }
-        else if(this.isPost && !this.description){
+        } else if (this.isPost && !this.description) {
           this.feedback = "You need to fill in all of the fields"
-        }
-        else{
+        } else {
           console.log(firebase.auth().currentUser.email)
   
           const Url = 'http://localhost:5001/post'
@@ -175,12 +172,12 @@
           } else {
             imageReference = ""
           }
-
+  
           /////////////////////////// remove for production
           var latitude = randomLat
           var longitude = randomLng
           // set the random coordinates
-          if(!this.isPost){
+          if (!this.isPost) {
             latitude = this.lat
             longitude = this.lng
           }
@@ -189,6 +186,7 @@
             "title": this.eventType + ": " + this.title,
             "description": this.description,
             "authorEmail": firebase.auth().currentUser.email,
+            "authorFirebaseID": firebase.auth().currentUser.uid,
             "lat": latitude,
             "lng": longitude,
             "timestamp": Date.now(),
@@ -198,13 +196,18 @@
           this.title = null
           this.hasChoosenFile = null
           this.description = null
+          this.lat = null
           // make the post request
           // This is how you do it:
           axios.post(Url, post)
             .then(response => {
   
               console.log("Posting added to the database")
-              this.method()
+              if(this.isPost){
+                // just a post, doesn't have to wait for the image
+                console.log("using method1")
+                this.method()
+              }
   
             })
             .catch(error => console.log(error))
@@ -213,8 +216,9 @@
         }
   
       },
-      gotAnImage(event) {
+      async gotAnImage(event) {
         console.log("Got an image! " + event.target.files[0])
+        // this saves the image in the full resolution
         this.hasChoosenFile = event.target.files[0]
         var reader = new FileReader();
   
@@ -226,12 +230,43 @@
   
         reader.readAsDataURL(event.target.files[0]);
   
+        // compressing the image file
+        const imageFile = event.target.files[0];
+        console.log('originalFile instanceof Blob', imageFile instanceof Blob); // true
+        console.log(`originalFile size ${imageFile.size / 1024 / 1024} MB`);
+  
+        var options = {
+          maxSizeMB: 0.1,
+          maxWidthOrHeight: 1920,
+          useWebWorker: true
+        }
+        try {
+          const compressedFile = await imageCompression(imageFile, options);
+          console.log('compressedFile instanceof Blob', compressedFile instanceof Blob); // true
+          console.log(`compressedFile size ${compressedFile.size / 1024 / 1024} MB`); // smaller than maxSizeMB
+  
+          this.hasChoosenFile = compressedFile
+        } catch (error) {
+          console.log(error);
+        }
       },
       uploadImageToFireStorage(firebaseReference) {
         console.log(firebaseReference)
   
-        var storageRef = firebase.storage().ref('eventHeaderImages/' + firebaseReference)
-        storageRef.put(this.hasChoosenFile)
+        const storageRef = firebase.storage().ref('eventHeaderImages/' + firebaseReference)
+        const submission = storageRef.put(this.hasChoosenFile)
+  
+        submission.on('state_changed', (snapshot) => {
+          // Observe state change events such as progress, pause, and resume
+        }, (error) => {
+          // Handle unsuccessful uploads
+          console.log(error);
+        }, () => {
+          // Do something once upload is complete
+          console.log('Successfully uploaded the file!');
+          console.log("using method2")
+          this.method()
+        });
       }
     }
   

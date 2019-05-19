@@ -1,10 +1,6 @@
 <template>
   <article class="media">
-    <figure class="media-left">
-      <p class="image is-64x64">
-        <img src="https://bulma.io/images/placeholders/128x128.png">
-      </p>
-    </figure>
+
     <div class="media-content">
       <div class="field">
         <p class="control">
@@ -52,6 +48,7 @@ import firebase from 'firebase'
             "description": this.text,
             "authorEmail": this.user_email,
             "timestamp": Date.now(),
+            "parentPostID":this.postID
           }
           this.title = null
           this.description = null

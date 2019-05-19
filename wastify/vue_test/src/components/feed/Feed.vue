@@ -14,9 +14,9 @@
             
             <div v-for="post in posts" :key="post.id">
             
-            <BigPostBox v-if="post.imageReference != ''" :text="post.description" :authorEmail="post.authorEmail" :user_id="user_id" :post_id="post.id" :timestamp="post.timestamp" :title="post.title" :imageReference="post.imageReference" :url="post.imageURL"/>
+            <BigPostBox v-if="post.imageReference != ''" :text="post.description" :authorEmail="post.authorEmail" :user_id="user_id" :post_id="post.id" :timestamp="post.timestamp" :title="post.title" :imageReference="post.imageReference" :url="post.imageURL"  :authorFirebaseID="post.authorFirebaseID"/>
             <PostBox style="width:31rem;" class="animated swing" v-if="post.imageReference == ''"
-                      :text="post.description"  :authorEmail="post.authorEmail" :timestamp="post.timestamp" :title="post.title" :user_id="user_id" :post_id="post.id"/>
+                      :text="post.description"  :authorEmail="post.authorEmail" :timestamp="post.timestamp" :title="post.title" :user_id="user_id" :post_id="post.id" :authorFirebaseID="post.authorFirebaseID"/>
             
           </div>
           <div id="sentinel" v-if="hasMorePosts">
@@ -74,25 +74,25 @@ export default {
       loading: false,
       socket: null,
       hasMorePosts: true,
-      counter: 1,
+      counter: 0,
       user_id: firebase.auth().currentUser.uid,
       postNumber: 0
     };
   },
   methods: {
     getFreshPosts(){
-      this.counter = 1
+      console.log("resetting")
+      this.counter = 0
       this.posts = []
-      this.getPosts()
       this.getUserPostNumber()
+      this.hasMorePosts = true
+      
     },
     getPosts(){
       this.loading = true
       axios.get('http://localhost:5001/latest_posts/'+this.counter*5)
       .then(response => {
         
-        console.log("response: " +response.data)
-        console.log(response.data[0])
         if(response.data[0]){
           this.counter +=1
           response.data.forEach(element => {
@@ -107,6 +107,7 @@ export default {
             id: element.id,
             description: element.description,
             authorEmail: element.authorEmail,
+            authorFirebaseID: element.authorFirebaseID,
             timestamp: timestamp,
             imageReference: element.imageReference,
             title: element.title,
@@ -114,6 +115,9 @@ export default {
           })
           console.log(element)
         });
+        if(response.data.length < 5){
+          this.hasMorePosts = false
+        }
         }else{
           this.hasMorePosts = false
         }
@@ -128,18 +132,6 @@ export default {
         axios.get(Url)
           .then(response => {
             
-            console.log(response.data)
-            this.postNumber = response.data
-            })
-          .catch(error => console.log(error))
-      },
-      getUserPostNumber(){
-        const Url = 'http://localhost:5001/get_post_number/'+this.user_id
-
-        axios.get(Url)
-          .then(response => {
-            
-            console.log(response.data)
             this.postNumber = response.data
             })
           .catch(error => console.log(error))
@@ -147,6 +139,7 @@ export default {
       
   },
   mounted() {
+    
     // Setting up all of the intersecion observers
     var sentinel = document.querySelector('#sentinel')
 
@@ -156,6 +149,7 @@ export default {
       if(entries[0].intersectionRatio <= 0){
         return;
       }
+      console.log("triggered")
       this.getPosts()
     })
     intersectionObserver.observe(sentinel)
@@ -176,8 +170,6 @@ export default {
       return
     })
     intersectionObserverNewPostBox.observe(newpostBoxSentinel)
-    console.log("UID")
-    console.log(firebase.auth().currentUser.uid)
   },
   created() {
     this.getUserPostNumber()

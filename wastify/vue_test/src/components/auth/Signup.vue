@@ -102,9 +102,7 @@ export default {
           })
         .catch(error => console.log(error))
 
-        if(feedback){
-          feedback = null
-        }
+        this.feedback = null
       
     },
     signup() {

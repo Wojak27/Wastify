@@ -20,7 +20,7 @@
   
             </div>
             <div class="imageDivProfileSmall">
-              <img src="../../assets/profile_picture.jpg" alt class class="img-background" style="object-fit: cover;">
+              <img :src="profileImageUrl" alt class class="img-background" style="object-fit: cover;">
             </div>
             <div class="right-div">
   
@@ -86,10 +86,12 @@
         likes: 0,
         isSameUser: false,
         user_id: firebase.auth().currentUser.uid,
+        profileImageUrl: null
       };
     },
     mounted() {
       this.getUserPositionOnMap()
+      this.downloadUserInfo()
     },
     methods: {
       handleError(e){
@@ -99,7 +101,15 @@
         console.log("image ref: "+ this.imageReference)
         this.imageUrl = "http://moritzdentalcare.com/wp-content/uploads/2016/10/orionthemes-placeholder-image.png"
         setTimeout(function(){ this.imageUrl = 'https://firebasestorage.googleapis.com/v0/b/geo-location-web-app.appspot.com/o/eventHeaderImages%2F' + this.imageReference + '?alt=media' }, 3000);
+        
       
+      },
+      downloadUserInfo(){
+        
+        const url = 'http://localhost:5001/user/id/'+this.user_id
+        axios.get(url).then(response => {
+          this.profileImageUrl = response.data.profileImageRef
+        }).catch(error => console.log(error))
       },
       likePost() {
         console.log("Post liked: " + this.post_id + " username: " + this.user_id)
@@ -262,6 +272,7 @@
   
       },
       getPost(id) {
+
         axios.get('http://localhost:5001/post/' + id)
           .then(response => {
             console.log("Got the post" + id)
@@ -288,7 +299,7 @@
             }
             console.log("Image url: " + this.imageUrl)
             this.post_id = id
-            this.getComments(id)
+            this.getFreshComments(id)
             this.getLikes()
             this.checkIfLiked()
             this.checkIfSameUser()
@@ -303,7 +314,9 @@
       getComments(id) {
         axios.get('http://localhost:5001/get_comments/' + id)
           .then(response => {
-  
+            if(this.comments.length != 0){
+              return
+            }
             response.data.forEach(element => {
               var timestamp
               if (Date.now() - element.timestamp < 3758207) {

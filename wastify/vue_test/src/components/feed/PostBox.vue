@@ -2,8 +2,7 @@
   <div class="box" style="margin-bottom:2rem">
   <article class="media">
     <div class="imageDiv media-left imageDivProfileNoMargin" style="background-color:red">
-        <img src="../../assets/profile_picture.jpg" alt class="img-background" style="
-  object-fit: cover; height.100%; width:100%;">
+        <img :src="this.profileImageUrl" alt class="img-background" style="object-fit: cover; height.100%; width:100%;">
       </div>
     <div class="media-content">
       <div class="content">
@@ -40,16 +39,16 @@ import firebase from 'firebase'
 
 export default {
   name: "PostBox",
-  props: ['text', 'authorEmail', 'timestamp', 'title', 'user_id', 'post_id'],
+  props: ['text', 'authorEmail', 'timestamp', 'title', 'user_id', 'post_id', 'authorFirebaseID'],
   data(){
     return{
       likes:0,
       isSameUser: false,
+      profileImageUrl: null,
     }
   },
   methods: {
     likePost(){
-      console.log("Post liked: "+ this.post_id + " username: "+this.user_id)
       const Url = 'http://localhost:5001/like_post'
 
       const like = {
@@ -69,7 +68,6 @@ export default {
     },
 
     checkIfSameUser(){
-      console.log("check if same user " + this.authorEmail + " " + (this.authorEmail == firebase.auth().currentUser.email))
       this.isSameUser = (this.authorEmail == firebase.auth().currentUser.email)
 
     },
@@ -82,12 +80,17 @@ export default {
       axios.get(Url)
         .then(response => {
           
-          console.log("Got likes")
-          console.log(response.data)
           this.likes = response.data
           })
         .catch(error => console.log(error))
     },
+  downloadUserInfo(){
+        
+        const url = 'http://localhost:5001/user/id/'+this.authorFirebaseID
+        axios.get(url).then(response => {
+          this.profileImageUrl = response.data.profileImageRef
+        }).catch(error => console.log(error))
+      },
   checkIfLiked(){
     const Url = 'http://localhost:5001/has_liked'
 
@@ -97,8 +100,6 @@ export default {
       }
       axios.post(Url, content)
         .then(response => {
-          console.log("Response data:")
-          console.log(response.data)
           if(response.data === "True"){
             $('#'+this.post_id).addClass("is-success")
           }
@@ -106,10 +107,12 @@ export default {
         .catch(error => console.log(error))
   }
   },
+
   created() {
     this.getLikes()
     this.checkIfLiked()
     this.checkIfSameUser()
+    this.downloadUserInfo()
   },
 }
 </script>

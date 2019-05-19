@@ -41,6 +41,7 @@ ma = Marshmallow(app)
 class Post(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     #name = db.Column(db.String(100), unique=True)
+    authorFirebaseID = db.Column(db.String(200), nullable=False)
     authorEmail = db.Column(db.String(200), db.ForeignKey('user.emailAddress'), nullable=False)
     title = db.Column(db.String(200), nullable=True)
     description = db.Column(db.Text, nullable= False)
@@ -56,7 +57,7 @@ class Post(db.Model):
 
     # removed the lat and lng from here, have got to remove it from the 
     # backend as well
-    def __init__(self,description, authorEmail, lat, lng, timestamp, imageReference=None, title=None, timeOfTheEvent=None):
+    def __init__(self,description, authorFirebaseID, authorEmail, lat, lng, timestamp, imageReference=None, title=None, timeOfTheEvent=None):
         self.title = title
         self.description = description
         self.authorEmail = authorEmail
@@ -65,18 +66,21 @@ class Post(db.Model):
         self.timestamp = timestamp
         self.imageReference = imageReference
         self.timeOfTheEvent = timeOfTheEvent
+        self.authorFirebaseID = authorFirebaseID
 
 #################### comment Class/Model
 class Comment(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     description = db.Column(db.Text, nullable= False)
-    authorEmail = db.Column(db.String(200), db.ForeignKey('post.authorEmail'), nullable=False)
+    authorEmail = db.Column(db.String(200), nullable=False)
     timestamp = db.Column(db.Integer, nullable= False)
+    parentPostID = db.Column(db.Integer, db.ForeignKey('post.id'), nullable=False)
 
-    def __init__(self,description, authorEmail, timestamp):
+    def __init__(self,description, authorEmail, timestamp, parentPostID):
         self.description = description
         self.authorEmail = authorEmail
         self.timestamp = timestamp
+        self.parentPostID = parentPostID
 
 likes = db.Table(
     'Likes',
@@ -93,6 +97,10 @@ class User(db.Model):
     #following = db.relationship('User', backref='followe', lazy=True)
     description = db.Column(db.Text, nullable=True)
     motto = db.Column(db.Text, nullable = True)
+
+    # Firebase image references for the user profile image and backgroud
+    profileImageRef = db.Column(db.String(200), nullable = True)
+    backgroundImageRef = db.Column(db.String(200), nullable = True)
 
     #creating the relation to the post
     posts = db.relationship('Post', 
@@ -114,22 +122,24 @@ class User(db.Model):
         self.posts = []
         self.creation_time = creation_time
         self.following = []    
+        self.profileImageRef = "https://www.bsn.eu/wp-content/uploads/2016/12/user-icon-image-placeholder-300-grey.jpg"
+        self.backgroundImageRef = "https://upload.wikimedia.org/wikipedia/commons/thumb/4/42/Shaqi_jrvej.jpg/1200px-Shaqi_jrvej.jpg"
 
 ######################### SCHEMAS ##############################
 # User Schema
 class UserSchema(ma.Schema):
      class Meta:
-         fields = ('firebase_id', 'username', 'emailAddress', 'creation_time', 'motto')
+         fields = ('firebase_id', 'username', 'emailAddress', 'creation_time', 'motto', 'profileImageRef','backgroundImageRef')
 
 # post Schema
 class PostSchema(ma.Schema):
      class Meta:
-         fields = ('id', 'description', 'authorEmail', 'lat', 'lng', 'timestamp', 'imageReference', 'title')
+         fields = ('id', 'description', 'authorFirebaseID' , 'authorEmail', 'lat', 'lng', 'timestamp', 'imageReference', 'title')
         
 # comment Schema
 class CommentSchema(ma.Schema):
      class Meta:
-         fields = ('id', 'description', 'authorEmail', 'timestamp')
+         fields = ('id', 'description', 'authorEmail', 'timestamp', 'parentPostID')
 
 ########################## THE API #######################################
 
@@ -138,6 +148,7 @@ class CommentSchema(ma.Schema):
 def add_post():
     print("Adding a new post")
     title = request.json['title']
+    authorFirebaseID = request.json['authorFirebaseID']
     description = request.json['description']
     authorEmail = request.json['authorEmail']
     lat = request.json['lat']
@@ -145,7 +156,7 @@ def add_post():
     timestamp = request.json['timestamp']
     imageReference = request.json['imageReference']
     timeOfTheEvent = request.json['timeOfTheEvent']
-    new_post = Post(description, authorEmail, lat, lng, timestamp, imageReference, title, timeOfTheEvent)
+    new_post = Post(description, authorFirebaseID, authorEmail, lat, lng, timestamp, imageReference, title, timeOfTheEvent)
 
     db.session.add(new_post)
     db.session.commit()
@@ -159,14 +170,14 @@ def add_comment(postID):
     description = request.json['description']
     authorEmail = request.json['authorEmail']
     timestamp = request.json['timestamp']
+    parentPostID = request.json['parentPostID']
 
     # Create the comment
-    new_comment = Comment(description, authorEmail, timestamp)
+    new_comment = Comment(description, authorEmail, timestamp, parentPostID)
 
     # Get the post for the comment from ID
     post = Post.query.get(int(postID))
     post.comments.append(new_comment)
-
     db.session.commit()
 
     return comment_schema.jsonify(new_comment)
@@ -180,15 +191,16 @@ def get_selected_posts(index):
     posts_count = len(posts)
     index = int(index)
     all_posts = []
-    print(posts_count-index+1)
-    if posts_count-(index+1-post_limit)>0 and posts_count-(index+1-post_limit)<5:
-        # We have less than 5 posts left, return the rest
-        print("We have less than 5 posts left, return the rest")
-        all_posts = posts[(index-post_limit):]
-    elif posts_count-(index+1-post_limit)>post_limit:
+    print(index)
+    print(posts_count)
+    if (posts_count - index) >= 5:
         # We have more than 5 posts remaining
         print("We have more than 5 posts remaining")
-        all_posts = posts[(index-post_limit):index]
+        all_posts = posts[index:index+post_limit]
+    elif (posts_count - index) > 0:
+        # We have less than 5 posts left, return the rest
+        print("We have less than 5 posts left, return the rest")
+        all_posts = posts[index:]  
     else:
         # If the index that we ask for is bigger than the post we have
         # just return an empty array
@@ -337,8 +349,6 @@ def get_signedIn_User(firebase_id):
     return user_schema.jsonify(user)
 
 # TODO: Get all of the post in the neighbearhood (radious or something similar)
-# TODO: aa$
-
 
 # Update a User
 @app.route('/user/update_user/<firebase_id>', methods=['PUT'])
@@ -359,12 +369,38 @@ def update_User(firebase_id):
 
 # Update a User motto
 @app.route('/user/update_user_motto/<firebase_id>', methods=['PUT'])
-def update_User_motto(firebase_id):
+def update_user_motto(firebase_id):
     user = User.query.get(firebase_id)
     
     motto = request.json['motto']
 
     user.motto = motto
+
+    db.session.commit()
+
+    return user_schema.jsonify(user)
+
+# Update a User profile image reference
+@app.route('/user/update_profile_image/<firebase_id>', methods=['PUT'])
+def update_user_profile_image(firebase_id):
+    user = User.query.get(firebase_id)
+    
+    profileImageRef = request.json['profileImageRef']
+
+    user.profileImageRef = profileImageRef
+
+    db.session.commit()
+
+    return user_schema.jsonify(user)
+
+# Update a User background image reference
+@app.route('/user/update_background_image/<firebase_id>', methods=['PUT'])
+def update_user_background_image(firebase_id):
+    user = User.query.get(firebase_id)
+    
+    backgroundImageRef = request.json['backgroundImageRef']
+
+    user.backgroundImageRef = backgroundImageRef
 
     db.session.commit()
 
